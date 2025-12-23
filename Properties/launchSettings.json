@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "ProgressCircleGradient (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "ProgressCircleGradient (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
