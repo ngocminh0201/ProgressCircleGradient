@@ -66,15 +66,16 @@ namespace ProgressCircleGradient.Brushes
             }
         }
 
+        const float delta = 0f;
         // Your exact Figma stops
         private static readonly Stop[] Stops = new[]
         {
-            new Stop(  7f, 0x99, 0x38, 0x7A, 0xFF), // #387AFF @ 60%
-            new Stop( 20f, 0xE6, 0x3C, 0xB9, 0xA2), // #3CB9A2 @ 90%
-            new Stop( 38f, 0xE6, 0x3D, 0xCC, 0x87), // #3DCC87 @ 90%
-            new Stop( 58f, 0xE6, 0x38, 0x7A, 0xFF), // #387AFF @ 90%
-            new Stop( 85f, 0x99, 0x3B, 0xA3, 0xC3), // #3BA3C3 @ 60%
-            new Stop( 96f, 0x99, 0x3D, 0xCC, 0x87), // #3DCC87 @ 60%
+            new Stop(  7f + delta, 0x99, 0x38, 0x7A, 0xFF), // #387AFF @ 60%
+            new Stop( 38f + delta, 0xE6, 0x3C, 0xB9, 0xA2), // #3CB9A2 @ 90%
+            //new Stop( 65f + delta, 0xE6, 0x3D, 0xCC, 0x87), // #3DCC87 @ 90%
+            //new Stop( 123f + delta, 0xE6, 0x38, 0x7A, 0xFF), // #387AFF @ 90%
+            //new Stop( 208f + delta, 0x99, 0x3B, 0xA3, 0xC3), // #3BA3C3 @ 60%
+            //new Stop( 304f + delta, 0x99, 0x3D, 0xCC, 0x87), // #3DCC87 @ 60%
         };
 
         protected override void OnConnected()
