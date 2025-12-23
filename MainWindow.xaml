@@ -14,7 +14,10 @@
         <MicaBackdrop />
     </Window.SystemBackdrop>
 
-    <Grid>
+    <StackPanel
+        HorizontalAlignment="Center"
+        VerticalAlignment="Center"
+        Orientation="Horizontal">
         <Border
             Width="240"
             Height="240"
@@ -23,8 +26,13 @@
             CornerRadius="12">
             <Border.Background>
                 <!--  tăng Resolution nếu muốn nét hơn  -->
-                <brushes:ConicGradientBrush Resolution="1024" />
+                <brushes:ConicGradientBrush Resolution="1028" />
             </Border.Background>
         </Border>
-    </Grid>
+        <Image
+            Width="240"
+            Height="240"
+            Margin="20,0,0,0"
+            Source="/Brushes/Rectangle 1297.png" />
+    </StackPanel>
 </Window>

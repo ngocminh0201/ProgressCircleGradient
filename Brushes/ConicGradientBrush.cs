@@ -66,15 +66,18 @@ namespace ProgressCircleGradient.Brushes
             }
         }
 
-        // Your exact Figma stops
+        const float delta = 0f;
+        // Figma stops: 6 colors with Angular gradient (0° at 6 o'clock, clockwise)
+        // Conversion: percentage to degrees = percentage * 3.6
+        // Example: 7% = 7 * 3.6 = 25.2°
         private static readonly Stop[] Stops = new[]
         {
-            new Stop(  7f, 0x99, 0x38, 0x7A, 0xFF), // #387AFF @ 60%
-            new Stop( 20f, 0xE6, 0x3C, 0xB9, 0xA2), // #3CB9A2 @ 90%
-            new Stop( 38f, 0xE6, 0x3D, 0xCC, 0x87), // #3DCC87 @ 90%
-            new Stop( 58f, 0xE6, 0x38, 0x7A, 0xFF), // #387AFF @ 90%
-            new Stop( 85f, 0x99, 0x3B, 0xA3, 0xC3), // #3BA3C3 @ 60%
-            new Stop( 96f, 0x99, 0x3D, 0xCC, 0x87), // #3DCC87 @ 60%
+            new Stop( 25.2f + delta, 0x99, 0x38, 0x7A, 0xFF), // #387AFF @ 60% (7% stops)
+            new Stop( 72.0f + delta, 0xE6, 0x3C, 0xB9, 0xA2), // #3CB9A2 @ 90% (20% stops)
+            new Stop(136.8f + delta, 0xE6, 0x3D, 0xCC, 0x87), // #3DCC87 @ 90% (38% stops)
+            new Stop(208.8f + delta, 0xE6, 0x38, 0x7A, 0xFF), // #387AFF @ 90% (58% stops)
+            new Stop(306.0f + delta, 0x99, 0x3B, 0xA3, 0xC3), // #3BA3C3 @ 60% (85% stops)
+            new Stop(345.6f + delta, 0x99, 0x3D, 0xCC, 0x87), // #3DCC87 @ 60% (96% stops)
         };
 
         protected override void OnConnected()
@@ -163,6 +166,10 @@ namespace ProgressCircleGradient.Brushes
             float cx = width * 0.5f;
             float cy = height * 0.5f;
 
+            // ✅ OFFSET BỔNG SUNG để điều chỉnh điểm gốc 0° từ góc 6h
+            // Nếu gradient hiện tại bị lệch 47° so với Figma, thêm -47° ở đây
+            const float initialAngleOffset = -46.2f;
+
             int idx = 0;
             for (int y = 0; y < height; y++)
             {
@@ -179,7 +186,9 @@ namespace ProgressCircleGradient.Brushes
                     if (rad < 0) rad += MathF.PI * 2f;
 
                     float angleDeg = rad * (180f / MathF.PI);
-                    angleDeg = (angleDeg + angleOffsetDeg) % 360f;
+                    // ✅ Áp dụng offset ban đầu + AngleOffsetDeg động
+                    angleDeg = (angleDeg + initialAngleOffset + angleOffsetDeg) % 360f;
+                    if (angleDeg < 0) angleDeg += 360f;
 
                     EvaluateColorAtAnglePremultiplied(angleDeg, out byte a, out byte rP, out byte gP, out byte bP);
 
