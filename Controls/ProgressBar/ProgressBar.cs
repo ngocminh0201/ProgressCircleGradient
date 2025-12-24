@@ -1,6 +1,8 @@
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
+using Microsoft.UI.Xaml.Data;
+using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Shapes;
 using System;
@@ -27,6 +29,27 @@ namespace ProgressCircleGradient.Controls.ProgressBar
         #endregion
 
         #region DependencyProperty
+        public Brush MaskBrush
+        {
+            get => (Brush)GetValue(MaskBrushProperty);
+            set => SetValue(MaskBrushProperty, value);
+        }
+
+        public static readonly DependencyProperty MaskBrushProperty =
+            DependencyProperty.Register(
+                nameof(MaskBrush),
+                typeof(Brush),
+                typeof(ProgressBar),
+                new PropertyMetadata(null, OnMaskBrushChanged));
+
+        private static void OnMaskBrushChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is ProgressBar self)
+            {
+                self.ApplyMaskBrush();
+            }
+        }
+
         public string Text
         {
             get => (string)GetValue(TextProperty);
@@ -175,6 +198,30 @@ namespace ProgressCircleGradient.Controls.ProgressBar
         #endregion
 
         #region PrivateMethods
+        private void ApplyMaskBrush()
+        {
+            if (IsIndeterminate)
+                return;
+
+            _progressBarIndicator ??= GetTemplateChild(PROGRESS_BAR_INDICATOR) as Rectangle;
+            if (_progressBarIndicator == null)
+                return;
+
+            if (MaskBrush != null)
+            {
+                // Chỉ vùng value mới vẽ -> Fill bằng gradient
+                _progressBarIndicator.Fill = MaskBrush;
+            }
+            else
+            {
+                // Trả về mặc định: bind lại Foreground (như template đang làm)
+                //_progressBarIndicator.SetBinding(Shape.FillProperty, new Binding
+                //{
+                //    RelativeSource = new RelativeSource(RelativeSourceMode.TemplatedParent),
+                //    Path = new PropertyPath(nameof(Foreground))
+                //});
+            }
+        }
 
         /// <summary>
         /// For WinUI, this events are necessary to assign.
@@ -203,6 +250,7 @@ namespace ProgressCircleGradient.Controls.ProgressBar
             base.OnApplyTemplate();
             InitiateIndeterminateAnimation();
             UpdateStyle();
+            ApplyMaskBrush();
             UpdateLayoutProgressText();
         }
 
@@ -234,7 +282,7 @@ namespace ProgressCircleGradient.Controls.ProgressBar
         private void UpdateStyle()
         {
             Style = (Style)(IsIndeterminate ? Application.Current.Resources[INDETERMINATE_STYLE] : Application.Current.Resources[DETERMINATE_STYLE]);
-
+            ApplyMaskBrush();
             UpdateIndicatorElement();
         }
 
@@ -243,6 +291,7 @@ namespace ProgressCircleGradient.Controls.ProgressBar
             if (!IsIndeterminate)
             {
                 _progressBarIndicator = GetTemplateChild(PROGRESS_BAR_INDICATOR) as Rectangle;
+                ApplyMaskBrush();
                 if (_progressBarIndicator != null && Maximum > 0)
                 {
                     _progressBarIndicator.Width = ActualWidth * (Value / Maximum);
