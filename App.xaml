@@ -10,6 +10,7 @@
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
                 <ResourceDictionary Source="Theme/ProgressCDThemeResources.xaml" />
                 <ResourceDictionary Source="Theme/ProgressCIThemeResources.xaml" />
+                <ResourceDictionary Source="Theme/ProgressBarThemeResources.xaml" />
                 <!--  Other merged dictionaries here  -->
             </ResourceDictionary.MergedDictionaries>
             <!--  Other app resources here  -->

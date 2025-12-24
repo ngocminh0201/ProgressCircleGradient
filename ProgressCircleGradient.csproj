@@ -51,6 +51,9 @@
     <Page Update="Theme\ProgressCIThemeResources.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Update="Theme\ProgressBarThemeResources.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
 
   <!--
