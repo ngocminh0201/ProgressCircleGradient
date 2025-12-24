@@ -1,0 +1,255 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:ProgressCircleGradient.Controls.ProgressCircle">
+
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+            <SolidColorBrush x:Key="OneUIProgressCircleDeterminateTextForeground" Color="#010102" />
+            <SolidColorBrush x:Key="OneUIProgressCircleIndeterminateEllipse" Color="#387AFF" />
+            <SolidColorBrush x:Key="OneUIProgressCircleIndeterminateVariantEllipse" Color="#3DCC87" />
+        </ResourceDictionary>
+
+        <ResourceDictionary x:Key="Dark">
+            <SolidColorBrush x:Key="OneUIProgressCircleDeterminateTextForeground" Color="#010102" />
+            <SolidColorBrush x:Key="OneUIProgressCircleIndeterminateEllipse" Color="#387AFF" />
+            <SolidColorBrush x:Key="OneUIProgressCircleIndeterminateVariantEllipse" Color="#3DCC87" />
+        </ResourceDictionary>
+
+        <ResourceDictionary x:Key="HighContrast">
+            <SolidColorBrush x:Key="OneUIProgressCircleDeterminateTextForeground" Color="#010102" />
+            <SolidColorBrush x:Key="OneUIProgressCircleIndeterminateEllipse" Color="#387AFF" />
+            <SolidColorBrush x:Key="OneUIProgressCircleIndeterminateVariantEllipse" Color="#3DCC87" />
+        </ResourceDictionary>
+
+    </ResourceDictionary.ThemeDictionaries>
+
+    <Style BasedOn="{StaticResource OneUIProgressCircleIndeterminate}" TargetType="local:ProgressCircleIndeterminate" />
+
+    <Style x:Key="OneUIProgressCircleIndeterminate" TargetType="local:ProgressCircleIndeterminate">
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="local:ProgressCircleIndeterminate">
+                    <Grid x:Name="PART_RootMainGrid">
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+
+                        <Grid
+                            x:Name="PART_RootGrid"
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            RenderTransformOrigin="0.5,0.5">
+                            <Grid.RenderTransform>
+                                <RotateTransform x:Name="GR" />
+                            </Grid.RenderTransform>
+
+                            <Grid x:Name="PART_ColorGrid">
+                                <Ellipse
+                                    x:Name="PART_Ellipse01"
+                                    Width="{TemplateBinding EllipseDiameter}"
+                                    Height="{TemplateBinding EllipseDiameter}"
+                                    Margin="{TemplateBinding EllipseMinOffset}"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Top"
+                                    Fill="{ThemeResource OneUIProgressCircleIndeterminateEllipse}">
+                                    <Ellipse.RenderTransform>
+                                        <TranslateTransform x:Name="EllipseTranslate1" Y="{TemplateBinding EllipseDisplacementPosition}" />
+                                    </Ellipse.RenderTransform>
+                                </Ellipse>
+
+                                <Ellipse
+                                    x:Name="PART_EllipsePoint"
+                                    Width="{TemplateBinding EllipseDiameter}"
+                                    Height="{TemplateBinding EllipseDiameter}"
+                                    Margin="{TemplateBinding EllipseMinOffset}"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    Fill="{ThemeResource OneUIProgressCircleIndeterminateVariantEllipse}">
+                                    <Ellipse.RenderTransform>
+                                        <TranslateTransform x:Name="EllipseTranslate2" X="{TemplateBinding EllipseNegativeDisplacement}" />
+                                    </Ellipse.RenderTransform>
+                                </Ellipse>
+
+                                <Ellipse
+                                    x:Name="PART_Ellipse02"
+                                    Width="{TemplateBinding EllipseDiameter}"
+                                    Height="{TemplateBinding EllipseDiameter}"
+                                    Margin="{TemplateBinding EllipseMinOffset}"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Bottom"
+                                    Fill="{ThemeResource OneUIProgressCircleIndeterminateEllipse}">
+                                    <Ellipse.RenderTransform>
+                                        <TranslateTransform x:Name="EllipseTranslate3" Y="{TemplateBinding EllipseNegativeDisplacement}" />
+                                    </Ellipse.RenderTransform>
+                                </Ellipse>
+
+                                <Ellipse
+                                    x:Name="PART_Ellipse03"
+                                    Width="{TemplateBinding EllipseDiameter}"
+                                    Height="{TemplateBinding EllipseDiameter}"
+                                    Margin="{TemplateBinding EllipseMinOffset}"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    Fill="{ThemeResource OneUIProgressCircleIndeterminateEllipse}">
+                                    <Ellipse.RenderTransform>
+                                        <TranslateTransform x:Name="EllipseTranslate4" X="{TemplateBinding EllipseDisplacementPosition}" />
+                                    </Ellipse.RenderTransform>
+                                </Ellipse>
+                            </Grid>
+
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal">
+                                        <Storyboard x:Name="RotateAnimation">
+                                            <DoubleAnimationUsingKeyFrames
+                                                BeginTime="0"
+                                                RepeatBehavior="Forever"
+                                                Storyboard.TargetName="GR"
+                                                Storyboard.TargetProperty="Angle">
+                                                <SplineDoubleKeyFrame
+                                                    KeySpline="0,0,1,1"
+                                                    KeyTime="0"
+                                                    Value="0" />
+                                                <SplineDoubleKeyFrame
+                                                    KeySpline="0,0,1,1"
+                                                    KeyTime="0:0:1"
+                                                    Value="360" />
+                                            </DoubleAnimationUsingKeyFrames>
+
+                                            <DoubleAnimationUsingKeyFrames
+                                                BeginTime="0"
+                                                RepeatBehavior="Forever"
+                                                Storyboard.TargetName="EllipseTranslate1"
+                                                Storyboard.TargetProperty="Y">
+                                                <SplineDoubleKeyFrame
+                                                    KeySpline="0.33,0,0.3,1"
+                                                    KeyTime="0"
+                                                    Value="0" />
+                                                <SplineDoubleKeyFrame
+                                                    KeySpline="0.33,0,0.3,1"
+                                                    KeyTime="0:0:0.500"
+                                                    Value="{Binding EllipseDisplacementPosition, RelativeSource={RelativeSource Mode=TemplatedParent}}" />
+                                                <SplineDoubleKeyFrame
+                                                    KeySpline="0.33,0,0.3,1"
+                                                    KeyTime="0:0:1"
+                                                    Value="0" />
+                                            </DoubleAnimationUsingKeyFrames>
+                                            <DoubleAnimationUsingKeyFrames
+                                                BeginTime="0"
+                                                RepeatBehavior="Forever"
+                                                Storyboard.TargetName="EllipseTranslate2"
+                                                Storyboard.TargetProperty="X">
+                                                <SplineDoubleKeyFrame
+                                                    KeySpline="0.33,0,0.3,1"
+                                                    KeyTime="0"
+                                                    Value="0" />
+                                                <SplineDoubleKeyFrame
+                                                    KeySpline="0.33,0,0.3,1"
+                                                    KeyTime="0:0:0.500"
+                                                    Value="{Binding EllipseNegativeDisplacement, RelativeSource={RelativeSource Mode=TemplatedParent}}" />
+                                                <SplineDoubleKeyFrame
+                                                    KeySpline="0.33,0,0.3,1"
+                                                    KeyTime="0:0:1"
+                                                    Value="0" />
+                                            </DoubleAnimationUsingKeyFrames>
+                                            <DoubleAnimationUsingKeyFrames
+                                                BeginTime="0"
+                                                RepeatBehavior="Forever"
+                                                Storyboard.TargetName="EllipseTranslate3"
+                                                Storyboard.TargetProperty="Y">
+                                                <SplineDoubleKeyFrame
+                                                    KeySpline="0.33,0,0.3,1"
+                                                    KeyTime="0"
+                                                    Value="0" />
+                                                <SplineDoubleKeyFrame
+                                                    KeySpline="0.33,0,0.3,1"
+                                                    KeyTime="0:0:0.500"
+                                                    Value="{Binding EllipseNegativeDisplacement, RelativeSource={RelativeSource Mode=TemplatedParent}}" />
+                                                <SplineDoubleKeyFrame
+                                                    KeySpline="0.33,0,0.3,1"
+                                                    KeyTime="0:0:1"
+                                                    Value="0" />
+                                            </DoubleAnimationUsingKeyFrames>
+                                            <DoubleAnimationUsingKeyFrames
+                                                BeginTime="0"
+                                                RepeatBehavior="Forever"
+                                                Storyboard.TargetName="EllipseTranslate4"
+                                                Storyboard.TargetProperty="X">
+                                                <SplineDoubleKeyFrame
+                                                    KeySpline="0.33,0,0.3,1"
+                                                    KeyTime="0"
+                                                    Value="0" />
+                                                <SplineDoubleKeyFrame
+                                                    KeySpline="0.33,0,0.3,1"
+                                                    KeyTime="0:0:0.500"
+                                                    Value="{Binding EllipseDisplacementPosition, RelativeSource={RelativeSource Mode=TemplatedParent}}" />
+                                                <SplineDoubleKeyFrame
+                                                    KeySpline="0.33,0,0.3,1"
+                                                    KeyTime="0:0:1"
+                                                    Value="0" />
+                                            </DoubleAnimationUsingKeyFrames>
+                                        </Storyboard>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                        </Grid>
+
+                        <TextBlock
+                            x:Name="PART_text"
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            FontSize="13"
+                            FontWeight="Normal"
+                            Foreground="{ThemeResource OneUIProgressCircleDeterminateTextForeground}"
+                            HorizontalTextAlignment="Center"
+                            MaxLines="2"
+                            Text="{TemplateBinding Text}"
+                            TextAlignment="Center"
+                            TextTrimming="CharacterEllipsis"
+                            TextWrapping="Wrap"
+                            Visibility="Collapsed" />
+
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CustomStates">
+                                <VisualState x:Name="TextVerticalAlignment">
+                                    <VisualState.Setters>
+                                        <Setter Target="PART_RootGrid.(Grid.Row)" Value="0" />
+                                        <Setter Target="PART_RootGrid.(Grid.Column)" Value="0" />
+                                        <Setter Target="PART_text.(Grid.Row)" Value="1" />
+                                        <Setter Target="PART_text.(Grid.Column)" Value="0" />
+
+                                        <Setter Target="PART_RootGrid.Margin" Value="4" />
+                                        <Setter Target="PART_text.Margin" Value="0,0,0,4" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="TextHorizontalAlignment">
+                                    <VisualState.Setters>
+                                        <Setter Target="PART_RootGrid.(Grid.Row)" Value="1" />
+                                        <Setter Target="PART_RootGrid.(Grid.Column)" Value="0" />
+                                        <Setter Target="PART_text.(Grid.Row)" Value="1" />
+                                        <Setter Target="PART_text.(Grid.Column)" Value="1" />
+
+                                        <Setter Target="PART_RootGrid.Margin" Value="4,4,4,4" />
+                                        <Setter Target="PART_text.Margin" Value="4,0,4,0" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>

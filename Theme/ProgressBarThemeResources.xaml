@@ -1,0 +1,302 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:OneUI="using:ProgressCircleGradient.Controls.ProgressBar">
+
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+            <SolidColorBrush x:Key="OneUIProgressBarForeground" Color="#387AFF" />
+            <SolidColorBrush x:Key="OneUIProgressBarBackground" Color="#1919171A" />
+
+            <SolidColorBrush x:Key="OneUIProgressBarTex" Color="#252528" />
+        </ResourceDictionary>
+
+        <ResourceDictionary x:Key="Dark">
+            <SolidColorBrush x:Key="OneUIProgressBarForeground" Color="#387AFF" />
+            <SolidColorBrush x:Key="OneUIProgressBarBackground" Color="#1919171A" />
+
+            <SolidColorBrush x:Key="OneUIProgressBarTex" Color="#252528" />
+        </ResourceDictionary>
+
+        <ResourceDictionary x:Key="HighContrast">
+            <SolidColorBrush x:Key="OneUIProgressBarForeground" Color="#387AFF" />
+            <SolidColorBrush x:Key="OneUIProgressBarBackground" Color="#1919171A" />
+
+            <SolidColorBrush x:Key="OneUIProgressBarTex" Color="#252528" />
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+
+    <x:Double x:Key="OneUIProgressBarIndicatorPauseOpacity">0.6</x:Double>
+    <Thickness x:Key="OneUIProgressBarBorderThemeThickness">0</Thickness>
+    <x:Double x:Key="OneUIProgressBarThemeMinHeight">4</x:Double>
+
+    <Style
+        x:Key="OneUICustomProgressBarIndeterminateStyle"
+        BasedOn="{StaticResource OneUIProgressBarIndeterminateStyle}"
+        TargetType="OneUI:ProgressBar">
+        <Setter Property="Foreground" Value="{ThemeResource OneUIProgressBarForeground}" />
+        <Setter Property="Background" Value="{ThemeResource OneUIProgressBarBackground}" />
+    </Style>
+
+    <Style
+        x:Key="OneUICustomProgressBarDeterminateStyle"
+        BasedOn="{StaticResource OneUIProgressBarDeterminateStyle}"
+        TargetType="OneUI:ProgressBar">
+        <Setter Property="Foreground" Value="{ThemeResource OneUIProgressBarForeground}" />
+        <Setter Property="Background" Value="{ThemeResource OneUIProgressBarBackground}" />
+    </Style>
+
+    <Style x:Key="OneUIProgressBarIndeterminateStyle" TargetType="OneUI:ProgressBar">
+        <Setter Property="Foreground" Value="{ThemeResource OneUIProgressBarForeground}" />
+        <Setter Property="Background" Value="{ThemeResource OneUIProgressBarBackground}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="OneUI:ProgressBar">
+                    <Grid x:Name="TemplateRoot">
+                        <StackPanel>
+                            <Border
+                                x:Name="outerBorder"
+                                BorderThickness="0"
+                                CornerRadius="4">
+                                <Grid Margin="0,12,0,12">
+                                    <Border
+                                        x:Name="maskingBorder"
+                                        Height="4"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        CornerRadius="2" />
+                                    <Border Height="4" Background="{TemplateBinding Background}">
+
+                                        <Grid CornerRadius="2">
+                                            <!--  Indeterminate_Part  -->
+                                            <Border
+                                                x:Name="B1"
+                                                Height="4"
+                                                Background="{TemplateBinding Foreground}"
+                                                CornerRadius="4">
+                                                <Border.RenderTransform>
+                                                    <TransformGroup>
+                                                        <ScaleTransform x:Name="B1ScaleTransform" />
+                                                        <TranslateTransform x:Name="B1TranslateTransform" />
+                                                    </TransformGroup>
+                                                </Border.RenderTransform>
+                                            </Border>
+                                            <Border
+                                                x:Name="B2"
+                                                Height="4"
+                                                Background="{TemplateBinding Foreground}"
+                                                CornerRadius="6">
+                                                <Border.RenderTransform>
+                                                    <TransformGroup>
+                                                        <ScaleTransform x:Name="B2ScaleTransform" />
+                                                        <TranslateTransform x:Name="B2TranslateTransform" />
+                                                    </TransformGroup>
+                                                </Border.RenderTransform>
+                                            </Border>
+
+                                            <Border
+                                                x:Name="B3"
+                                                Height="4"
+                                                Background="{TemplateBinding Foreground}"
+                                                CornerRadius="8">
+                                                <Border.RenderTransform>
+                                                    <TransformGroup>
+                                                        <ScaleTransform x:Name="B3ScaleTransform" />
+                                                        <TranslateTransform x:Name="B3TranslateTransform" />
+                                                    </TransformGroup>
+                                                </Border.RenderTransform>
+                                            </Border>
+                                            <Border
+                                                x:Name="B4"
+                                                Height="4"
+                                                Background="{TemplateBinding Foreground}"
+                                                CornerRadius="142">
+                                                <Border.RenderTransform>
+                                                    <TransformGroup>
+                                                        <ScaleTransform x:Name="B4ScaleTransform" />
+                                                        <TranslateTransform x:Name="B4TranslateTransform" />
+                                                    </TransformGroup>
+                                                </Border.RenderTransform>
+                                            </Border>
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+
+                            </Border>
+                            <TextBlock
+                                x:Name="OneUIProgressTextBlock"
+                                Margin="24,0,24,0"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Top"
+                                FontFamily="SegoeUI"
+                                FontSize="13"
+                                FontWeight="Normal"
+                                Foreground="{ThemeResource OneUIProgressBarTex}"
+                                HorizontalTextAlignment="Center"
+                                LineHeight="16"
+                                MaxLines="2"
+                                Text="{TemplateBinding Text}"
+                                TextTrimming="CharacterEllipsis"
+                                TextWrapping="Wrap"
+                                Visibility="Collapsed" />
+                        </StackPanel>
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal" />
+                                <VisualState x:Name="Indeterminate">
+                                    <Storyboard
+                                        x:Name="IndeterminateAnimation"
+                                        AutoReverse="False"
+                                        RepeatBehavior="Forever"
+                                        SpeedRatio="0.9"
+                                        Duration="0:0:1.916">
+
+                                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="B1TranslateTransform" Storyboard.TargetProperty="X" />
+                                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="B2TranslateTransform" Storyboard.TargetProperty="X" />
+                                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="B3TranslateTransform" Storyboard.TargetProperty="X" />
+                                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="B4TranslateTransform" Storyboard.TargetProperty="X" />
+
+                                        <!--  Element 1  -->
+                                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="B1ScaleTransform" Storyboard.TargetProperty="ScaleX">
+                                            <SplineDoubleKeyFrame KeyTime="0:0:0" Value="-0.3" />
+                                            <SplineDoubleKeyFrame KeyTime="0:0:0.350" Value="0.5915" />
+                                            <SplineDoubleKeyFrame
+                                                KeySpline="0.33,0,0.2,1"
+                                                KeyTime="0:0:1.330"
+                                                Value="0.0871" />
+                                        </DoubleAnimationUsingKeyFrames>
+                                        <!--  Element 2  -->
+                                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="B2ScaleTransform" Storyboard.TargetProperty="ScaleX">
+                                            <SplineDoubleKeyFrame KeyTime="0:0:0" Value="-0.3" />
+                                            <SplineDoubleKeyFrame KeyTime="0:0:0.566" Value="0.3494" />
+                                            <SplineDoubleKeyFrame
+                                                KeySpline="0.33,0,0.1,1"
+                                                KeyTime="0:0:1.456"
+                                                Value="0.0457" />
+                                        </DoubleAnimationUsingKeyFrames>
+
+                                        <!--  Element 3  -->
+                                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="B3ScaleTransform" Storyboard.TargetProperty="ScaleX">
+                                            <SplineDoubleKeyFrame KeyTime="0:0:0" Value="-0.3" />
+                                            <SplineDoubleKeyFrame KeyTime="0:0:0.500" Value="0.2192" />
+                                            <SplineDoubleKeyFrame
+                                                KeySpline="0.33,0,0.1,1"
+                                                KeyTime="0:0:1.750"
+                                                Value="0.0141" />
+                                        </DoubleAnimationUsingKeyFrames>
+
+                                        <!--  Element 4  -->
+                                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="B4ScaleTransform" Storyboard.TargetProperty="ScaleX">
+                                            <SplineDoubleKeyFrame KeyTime="0:0:0" Value="-0.3" />
+                                            <SplineDoubleKeyFrame KeyTime="0:0:0.2" Value="0.0141" />
+                                        </DoubleAnimationUsingKeyFrames>
+
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="B1" Storyboard.TargetProperty="CornerRadius">
+                                            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="4" />
+                                            <DiscreteObjectKeyFrame KeyTime="0:0:0.350" Value="4" />
+                                            <DiscreteObjectKeyFrame KeyTime="0:0:0.680" Value="10" />
+                                            <DiscreteObjectKeyFrame KeyTime="0:0:1" Value="16" />
+                                            <DiscreteObjectKeyFrame KeyTime="0:0:1.330" Value="23" />
+                                            <DiscreteObjectKeyFrame KeyTime="0:0:1.916" Value="23" />
+                                        </ObjectAnimationUsingKeyFrames>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="B2" Storyboard.TargetProperty="CornerRadius">
+                                            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="6" />
+                                            <DiscreteObjectKeyFrame KeyTime="0:0:0.566" Value="6" />
+                                            <DiscreteObjectKeyFrame KeyTime="0:0:0.866" Value="20" />
+                                            <DiscreteObjectKeyFrame KeyTime="0:0:1.166" Value="32" />
+                                            <DiscreteObjectKeyFrame KeyTime="0:0:1.456" Value="44" />
+                                            <DiscreteObjectKeyFrame KeyTime="0:0:1.916" Value="44" />
+                                        </ObjectAnimationUsingKeyFrames>
+                                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="B3" Storyboard.TargetProperty="CornerRadius">
+                                            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="8" />
+                                            <DiscreteObjectKeyFrame KeyTime="0:0:0.500" Value="8" />
+                                            <DiscreteObjectKeyFrame KeyTime="0:0:0.900" Value="48" />
+                                            <DiscreteObjectKeyFrame KeyTime="0:0:1.100" Value="60" />
+                                            <DiscreteObjectKeyFrame KeyTime="0:0:1.300" Value="72" />
+                                            <DiscreteObjectKeyFrame KeyTime="0:0:1.500" Value="100" />
+                                            <DiscreteObjectKeyFrame KeyTime="0:0:1.750" Value="142" />
+                                            <DiscreteObjectKeyFrame KeyTime="0:0:1.916" Value="142" />
+                                        </ObjectAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="OneUIProgressBarDeterminateStyle" TargetType="OneUI:ProgressBar">
+        <Setter Property="Foreground" Value="{ThemeResource OneUIProgressBarForeground}" />
+        <Setter Property="Background" Value="{ThemeResource OneUIProgressBarBackground}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="OneUI:ProgressBar">
+                    <Grid x:Name="TemplateRoot">
+                        <StackPanel>
+                            <Border
+                                x:Name="outerBorder"
+                                BorderThickness="0"
+                                CornerRadius="2">
+                                <Grid Margin="0,12,0,12">
+                                    <Border
+                                        x:Name="maskingBorder"
+                                        Height="4"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        CornerRadius="2" />
+                                    <Grid>
+                                        <!--  Determinate_Part  -->
+                                        <Border
+                                            Height="4"
+                                            Background="Transparent"
+                                            CornerRadius="2" />
+                                        <Border
+                                            x:Name="DeterminateRoot"
+                                            Height="4"
+                                            Background="{TemplateBinding Background}"
+                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                            BorderThickness="{TemplateBinding BorderThickness}">
+                                            <Rectangle
+                                                x:Name="ProgressBarIndicator"
+                                                Margin="{TemplateBinding Padding}"
+                                                HorizontalAlignment="Left"
+                                                Fill="{TemplateBinding Foreground}"
+                                                RadiusX="2"
+                                                RadiusY="2" />
+                                        </Border>
+                                    </Grid>
+
+                                </Grid>
+                            </Border>
+                            <TextBlock
+                                x:Name="OneUIProgressTextBlock"
+                                Margin="24,0,24,0"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Top"
+                                FontFamily="SegoeUI"
+                                FontSize="13"
+                                FontWeight="Normal"
+                                Foreground="{ThemeResource OneUIProgressBarTex}"
+                                HorizontalTextAlignment="Center"
+                                LineHeight="16"
+                                MaxLines="2"
+                                Text="{TemplateBinding Text}"
+                                TextTrimming="CharacterEllipsis"
+                                TextWrapping="Wrap"
+                                Visibility="Collapsed" />
+                        </StackPanel>
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal" />
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>
