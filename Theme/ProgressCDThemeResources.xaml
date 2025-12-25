@@ -77,6 +77,12 @@
                                 </Path>
 
                                 <Path
+                                    x:Name="PART_ProgressPath"
+                                    Fill="{TemplateBinding Foreground}"
+                                    IsHitTestVisible="False"
+                                    Visibility="Collapsed" />
+
+                                <Path
                                     x:Name="PART_InnerPath"
                                     Stroke="{TemplateBinding Background}"
                                     Visibility="Visible">

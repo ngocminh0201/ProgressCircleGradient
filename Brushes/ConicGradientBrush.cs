@@ -5,6 +5,7 @@ using Microsoft.UI.Composition;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using System;
+using System.Numerics;
 using Windows.Foundation;
 
 namespace ProgressCircleGradient.Brushes
@@ -15,6 +16,51 @@ namespace ProgressCircleGradient.Brushes
     /// </summary>
     public sealed class ConicGradientBrush : XamlCompositionBrushBase
     {
+        //public bool UseAbsoluteMapping
+        //{
+        //    get => (bool)GetValue(UseAbsoluteMappingProperty);
+        //    set => SetValue(UseAbsoluteMappingProperty, value);
+        //}
+        //public static readonly DependencyProperty UseAbsoluteMappingProperty =
+        //    DependencyProperty.Register(nameof(UseAbsoluteMapping), typeof(bool), typeof(ConicGradientBrush),
+        //        new PropertyMetadata(false, OnMappingChanged));
+
+        //public double OffsetX
+        //{
+        //    get => (double)GetValue(OffsetXProperty);
+        //    set => SetValue(OffsetXProperty, value);
+        //}
+        //public static readonly DependencyProperty OffsetXProperty =
+        //    DependencyProperty.Register(nameof(OffsetX), typeof(double), typeof(ConicGradientBrush),
+        //        new PropertyMetadata(0d, OnMappingChanged));
+
+        //public double OffsetY
+        //{
+        //    get => (double)GetValue(OffsetYProperty);
+        //    set => SetValue(OffsetYProperty, value);
+        //}
+        //public static readonly DependencyProperty OffsetYProperty =
+        //    DependencyProperty.Register(nameof(OffsetY), typeof(double), typeof(ConicGradientBrush),
+        //        new PropertyMetadata(0d, OnMappingChanged));
+
+        //public double ScaleX
+        //{
+        //    get => (double)GetValue(ScaleXProperty);
+        //    set => SetValue(ScaleXProperty, value);
+        //}
+        //public static readonly DependencyProperty ScaleXProperty =
+        //    DependencyProperty.Register(nameof(ScaleX), typeof(double), typeof(ConicGradientBrush),
+        //        new PropertyMetadata(1d, OnMappingChanged));
+
+        //public double ScaleY
+        //{
+        //    get => (double)GetValue(ScaleYProperty);
+        //    set => SetValue(ScaleYProperty, value);
+        //}
+        //public static readonly DependencyProperty ScaleYProperty =
+        //    DependencyProperty.Register(nameof(ScaleY), typeof(double), typeof(ConicGradientBrush),
+        //        new PropertyMetadata(1d, OnMappingChanged));
+
         public static readonly DependencyProperty ResolutionProperty =
             DependencyProperty.Register(
                 nameof(Resolution),
@@ -49,6 +95,42 @@ namespace ProgressCircleGradient.Brushes
         {
             ((ConicGradientBrush)d).RebuildIfConnected();
         }
+
+        //private static void OnMappingChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        //{
+        //    ((ConicGradientBrush)d).ApplyMappingIfConnected();
+        //}
+
+        //private void ApplyMappingIfConnected()
+        //{
+        //    if (_surfaceBrush == null)
+        //        return;
+
+        //    if (!UseAbsoluteMapping)
+        //    {
+        //        _surfaceBrush.Stretch = CompositionStretch.Fill;
+        //        _surfaceBrush.TransformMatrix = Matrix3x2.Identity;
+        //        // (Fill thì alignment ratio không quan trọng)
+        //        return;
+        //    }
+
+        //    // Absolute mapping: không stretch, dùng transform để “cắt” vùng
+        //    _surfaceBrush.Stretch = CompositionStretch.None;
+        //    _surfaceBrush.HorizontalAlignmentRatio = 0f; // neo top-left
+        //    _surfaceBrush.VerticalAlignmentRatio = 0f;
+
+        //    // Dịch ảnh sang trái/ lên trên => element sẽ thấy vùng ở (OffsetX, OffsetY)
+        //    float ox = (float)OffsetX;
+        //    float oy = (float)OffsetY;
+        //    float sx = (float)ScaleX;
+        //    float sy = (float)ScaleY;
+
+        //    _surfaceBrush.TransformMatrix =
+        //        Matrix3x2.CreateScale(sx, sy) *
+        //        Matrix3x2.CreateTranslation(-ox, -oy);
+
+        //}
+
 
         private Compositor? _compositor;
         private CompositionGraphicsDevice? _graphicsDevice;
@@ -96,6 +178,9 @@ namespace ProgressCircleGradient.Brushes
             _surfaceBrush = _compositor.CreateSurfaceBrush(_surface);
             _surfaceBrush.Stretch = CompositionStretch.Fill;
             CompositionBrush = _surfaceBrush;
+
+            //ApplyMappingIfConnected();
+
         }
 
         protected override void OnDisconnected()
