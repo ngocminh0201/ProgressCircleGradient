@@ -43,7 +43,7 @@
             Size="XLarge"
             Type="Determinate1"
             Visibility="Visible"
-            Value="97">
+            Value="100">
             <OneUI:ProgressCircleDeterminate.Foreground>
                 <!--  ConicGradientBrush của bạn  -->
                 <brushes:ConicGradientBrush />

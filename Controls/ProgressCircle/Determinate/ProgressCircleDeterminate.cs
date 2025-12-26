@@ -283,18 +283,43 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
             return new Point(Radius + Thickness / 2, Radius + Thickness / 2);
         }
 
+        //private double GetAngle()
+        //{
+        //    double v = Value;
+        //    if (v < 0) v = 0;
+        //    if (v > 100) v = 100;
+
+        //    if (v <= 0) return 0;
+
+        //    // Ép full vòng khi gần 100% (tránh float/animation làm không đúng 100)
+        //    if (v >= 99.95) return 360.0;
+
+        //    // Không dùng correction nữa cho determinate fill (mask)
+        //    double angle = v / 100.0 * 360.0;
+
+        //    // đảm bảo không chạm đúng 360 để không gây edge-case ở arc math (nhưng vẫn < 360)
+        //    return Math.Min(angle, 359.999);
+        //}
+
+
         private double GetAngle()
         {
-            // clamp
-            var v = Value;
+            double v = Value;
             if (v < 0) v = 0;
             if (v > 100) v = 100;
 
-            double angle = v * CIRCLE_CENTER_TO_BORDER_CORRECTION_FACTOR / 100 * 360;
-            if (angle >= 360) angle = 359.999;
-            if (angle < 0) angle = 0;
-            return angle;
+            if (v <= 0) return 0;
+
+            // 100%: vẽ full ring để không hở
+            if (v >= 100) return 360.0;
+
+            // <100%: dùng đúng logic cũ (correction factor) để tránh “đuôi đè lên đầu”
+            double angle = v * CIRCLE_CENTER_TO_BORDER_CORRECTION_FACTOR / 100.0 * 360.0;
+
+            // tránh đúng 360 trong nhánh segment
+            return Math.Min(angle, 359.999);
         }
+
 
         private void UpdateTrackGeometry(Point centerPoint, double radius)
         {
@@ -340,6 +365,7 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
 
                 _progressGeom = new PathGeometry
                 {
+                    FillRule = FillRule.Nonzero,
                     Figures = new PathFigureCollection { _progressFig }
                 };
             }
