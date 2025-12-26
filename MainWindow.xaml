@@ -58,6 +58,12 @@
             IsIndeterminate="False"
             Value="100" />
 
+        <OneUI:ProgressCircleIndeterminate Margin="20,0,0,0" Size="XLarge">
+            <OneUI:ProgressCircleIndeterminate.Foreground>
+                <brushes:ConicGradientBrush />
+            </OneUI:ProgressCircleIndeterminate.Foreground>
+        </OneUI:ProgressCircleIndeterminate>
+
         <!--<OneUI:ProgressCircleDeterminate
             Margin="20,0,0,0"
             Background="#1917171A"
