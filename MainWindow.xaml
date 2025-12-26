@@ -37,53 +37,26 @@
             Margin="20,0,0,0"
             Source="/Brushes/Rectangle 1297.png" />-->
 
-        <!--<OneUI2:ProgressBar
-            Width="500"
-            Height="20"
-            Margin="20,0,0,0"
-            Background="#1917171A"
-            Foreground="#387AFF"
-            IsIndeterminate="False"
-            Value="100">
-
-        -->
-        <!--  Đây là “mask layer” của bạn, nhưng nó KHÔNG lộ ra ngoài vì chỉ Fill indicator dùng  -->
-        <!--
-            <OneUI2:ProgressBar.MaskBrush>
-                <brushes:ConicGradientBrush
-                    OffsetX="0"
-                    OffsetY="50"
-                    Resolution="1028"
-                    ScaleX="0.5"
-                    ScaleY="0.5"
-                    UseAbsoluteMapping="True" />
-            </OneUI2:ProgressBar.MaskBrush>
-        </OneUI2:ProgressBar>-->
-
-        <OneUI2:ProgressBar
-            Width="100"
-            Height="20"
-            Margin="20,0,0,0"
-            Background="#1917171A"
-            Foreground="#387AFF"
-            IsIndeterminate="False"
-            Value="100">
-
-            <OneUI2:ProgressBar.MaskBrush>
-                <brushes:ConicGradientBrush Resolution="1028" />
-            </OneUI2:ProgressBar.MaskBrush>
-        </OneUI2:ProgressBar>
         <OneUI:ProgressCircleDeterminate
             Margin="20,0,0,0"
             Background="#1919171A"
             Size="XLarge"
-            Value="72">
+            Type="Determinate1"
+            Visibility="Visible"
+            Value="97">
             <OneUI:ProgressCircleDeterminate.Foreground>
                 <!--  ConicGradientBrush của bạn  -->
                 <brushes:ConicGradientBrush />
             </OneUI:ProgressCircleDeterminate.Foreground>
         </OneUI:ProgressCircleDeterminate>
 
+        <OneUI2:ProgressBar
+            Width="200"
+            Height="20"
+            Margin="20,0,0,0"
+            Background="#1917171A"
+            IsIndeterminate="False"
+            Value="100" />
 
         <!--<OneUI:ProgressCircleDeterminate
             Margin="20,0,0,0"

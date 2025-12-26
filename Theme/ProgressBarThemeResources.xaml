@@ -7,6 +7,12 @@
         <ResourceDictionary x:Key="Light">
             <SolidColorBrush x:Key="OneUIProgressBarForeground" Color="#387AFF" />
             <SolidColorBrush x:Key="OneUIProgressBarBackground" Color="#1919171A" />
+            <LinearGradientBrush x:Key="OneUIProgressBarDeterminateForeground" StartPoint="0,0.5" EndPoint="1,0.5">
+                <GradientStop Offset="0.0" Color="#FF387AFF" />
+                <GradientStop Offset="0.19" Color="#FF3DCC87" />
+                <GradientStop Offset="0.37" Color="#FF387AFF" />
+                <GradientStop Offset="1.0" Color="#FF3DCC87" />
+            </LinearGradientBrush>
 
             <SolidColorBrush x:Key="OneUIProgressBarTex" Color="#252528" />
         </ResourceDictionary>
@@ -14,6 +20,12 @@
         <ResourceDictionary x:Key="Dark">
             <SolidColorBrush x:Key="OneUIProgressBarForeground" Color="#387AFF" />
             <SolidColorBrush x:Key="OneUIProgressBarBackground" Color="#1919171A" />
+            <LinearGradientBrush x:Key="OneUIProgressBarDeterminateForeground" StartPoint="0,0.5" EndPoint="1,0.5">
+                <GradientStop Offset="0.0" Color="#FF387AFF" />
+                <GradientStop Offset="0.19" Color="#FF3DCC87" />
+                <GradientStop Offset="0.37" Color="#FF387AFF" />
+                <GradientStop Offset="1.0" Color="#FF3DCC87" />
+            </LinearGradientBrush>
 
             <SolidColorBrush x:Key="OneUIProgressBarTex" Color="#252528" />
         </ResourceDictionary>
@@ -229,7 +241,7 @@
     </Style>
 
     <Style x:Key="OneUIProgressBarDeterminateStyle" TargetType="OneUI:ProgressBar">
-        <Setter Property="Foreground" Value="{ThemeResource OneUIProgressBarForeground}" />
+        <Setter Property="Foreground" Value="{ThemeResource OneUIProgressBarDeterminateForeground}" />
         <Setter Property="Background" Value="{ThemeResource OneUIProgressBarBackground}" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Template">
