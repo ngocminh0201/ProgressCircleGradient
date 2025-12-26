@@ -35,32 +35,6 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
         private const double ELLIPE_BASE_DISPLACEMENT = 5;
         private const double ELLIPE_BASE_DISPLACEMENT_REVERSE = -4;
 
-        // ----- ConicGradientBrush sampling (must match ConicGradientBrush.cs) -----
-        // In ConicGradientBrush.BuildConicGradientPixelsPremultipliedBGRA:
-        // angleDeg = (angleDeg + initialAngleOffset(-46.2) + AngleOffsetDeg) % 360
-        private const float CONIC_INITIAL_ANGLE_OFFSET_DEG = -46.2f;
-
-        private readonly struct ConicStop
-        {
-            public readonly float AngleDeg;
-            public readonly byte A, R, G, B;
-            public ConicStop(float angleDeg, byte a, byte r, byte g, byte b)
-            {
-                AngleDeg = angleDeg;
-                A = a; R = r; G = g; B = b;
-            }
-        }
-
-        private static readonly ConicStop[] ConicStops = new[]
-        {
-            new ConicStop( 25.2f, 0x99, 0x38, 0x7A, 0xFF), // #387AFF @ 60% (7%)
-            new ConicStop( 72.0f, 0xE6, 0x3C, 0xB9, 0xA2), // #3CB9A2 @ 90% (20%)
-            new ConicStop(136.8f, 0xE6, 0x3D, 0xCC, 0x87), // #3DCC87 @ 90% (38%)
-            new ConicStop(208.8f, 0xE6, 0x38, 0x7A, 0xFF), // #387AFF @ 90% (58%)
-            new ConicStop(306.0f, 0x99, 0x3B, 0xA3, 0xC3), // #3BA3C3 @ 60% (85%)
-            new ConicStop(345.6f, 0x99, 0x3D, 0xCC, 0x87), // #3DCC87 @ 60% (96%)
-        };
-
         private const int GRIDSIZE_XL = 90;
         private const int GRIDSIZE_LG = 60;
         private const int GRIDSIZE_MD = 48;
@@ -226,16 +200,7 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
 
         private void ProgressCircleIndeterminate_Unloaded(object sender, RoutedEventArgs e)
         {
-            if (_visibilityPropertyRegisterToken != 0)
-            {
-                UnregisterPropertyChangedCallback(VisibilityProperty, _visibilityPropertyRegisterToken);
-                _visibilityPropertyRegisterToken = 0;
-            }
-
-            if (_themeSettings != null)
-            {
-                _themeSettings.Changed -= ThemeSettings_Changed;
-            }
+            UnregisterPropertyChangedCallback(VisibilityProperty, _visibilityPropertyRegisterToken);
 
             _rotateAnimation?.Stop();
         }
@@ -416,7 +381,6 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
         private ConicGradientBrush GetConicBrushSourceOrNull()
         {
             // Allow the user to set the conic brush via either Foreground or PointForeground.
-            // (So your sample XAML that sets PointForeground will still work.)
             if (PointForeground is ConicGradientBrush c1)
                 return c1;
             if (Foreground is ConicGradientBrush c2)
@@ -463,10 +427,11 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
             var bottom = new Windows.Foundation.Point(cx, h - m - d * 0.5);
             var left = new Windows.Foundation.Point(m + d * 0.5, cy);
 
-            Color cTop = SampleConicColorAtPoint(conic, top, cx, cy);
-            Color cRight = SampleConicColorAtPoint(conic, right, cx, cy);
-            Color cBottom = SampleConicColorAtPoint(conic, bottom, cx, cy);
-            Color cLeft = SampleConicColorAtPoint(conic, left, cx, cy);
+            // Use the ConicGradientBrush.SampleColorAtPoint to sample colors at these points
+            Color cTop = ConicGradientBrush.SampleColorAtPoint(top, cx, cy);
+            Color cRight = ConicGradientBrush.SampleColorAtPoint(right, cx, cy);
+            Color cBottom = ConicGradientBrush.SampleColorAtPoint(bottom, cx, cy);
+            Color cLeft = ConicGradientBrush.SampleColorAtPoint(left, cx, cy);
 
             // Freeze: each dot becomes a SolidColorBrush so it keeps the same color while moving.
             _ellipse01.Fill = new SolidColorBrush(cTop);
@@ -500,103 +465,6 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
 
             return brush ?? ColorsHelpers.ConvertColorHex(defaultHex);
         }
-
-        private static Color SampleConicColorAtPoint(ConicGradientBrush brush, Windows.Foundation.Point p, double cx, double cy)
-        {
-            float px = (float)(p.X - cx);
-            float py = (float)(p.Y - cy);
-
-            // Must match ConicGradientBrush:
-            // 0° at 6 o'clock (down), increasing clockwise => atan2(-x, y)
-            float rad = MathF.Atan2(-px, py);
-            if (rad < 0)
-                rad += MathF.PI * 2f;
-
-            float angleDeg = rad * (180f / MathF.PI);
-
-            angleDeg = (angleDeg + CONIC_INITIAL_ANGLE_OFFSET_DEG + brush.AngleOffsetDeg) % 360f;
-            if (angleDeg < 0)
-                angleDeg += 360f;
-
-            EvaluateConicColorPremultiplied(angleDeg, out byte a, out byte rP, out byte gP, out byte bP);
-
-            if (a == 0)
-                return Colors.Transparent;
-
-            // Un-premultiply so SolidColorBrush renders the same visual color.
-            float af = a / 255f;
-            byte r = (byte)Math.Clamp((int)MathF.Round(rP / af), 0, 255);
-            byte g = (byte)Math.Clamp((int)MathF.Round(gP / af), 0, 255);
-            byte b = (byte)Math.Clamp((int)MathF.Round(bP / af), 0, 255);
-
-            return Color.FromArgb(a, r, g, b);
-        }
-
-        private static void EvaluateConicColorPremultiplied(float angleDeg, out byte aOut, out byte rPOut, out byte gPOut, out byte bPOut)
-        {
-            angleDeg %= 360f;
-            if (angleDeg < 0)
-                angleDeg += 360f;
-
-            ConicStop prev, next;
-            float prevAngle, nextAngle;
-
-            if (angleDeg < ConicStops[0].AngleDeg)
-            {
-                prev = ConicStops[^1];
-                next = ConicStops[0];
-                prevAngle = prev.AngleDeg - 360f;
-                nextAngle = next.AngleDeg;
-            }
-            else if (angleDeg >= ConicStops[^1].AngleDeg)
-            {
-                prev = ConicStops[^1];
-                next = ConicStops[0];
-                prevAngle = prev.AngleDeg;
-                nextAngle = next.AngleDeg + 360f;
-            }
-            else
-            {
-                int i = 0;
-                for (; i < ConicStops.Length - 1; i++)
-                {
-                    if (ConicStops[i].AngleDeg <= angleDeg && angleDeg < ConicStops[i + 1].AngleDeg)
-                        break;
-                }
-
-                prev = ConicStops[i];
-                next = ConicStops[i + 1];
-                prevAngle = prev.AngleDeg;
-                nextAngle = next.AngleDeg;
-            }
-
-            float t = (angleDeg - prevAngle) / (nextAngle - prevAngle);
-            t = Math.Clamp(t, 0f, 1f);
-
-            float ap0 = prev.A / 255f;
-            float ap1 = next.A / 255f;
-
-            // Premultiplied interpolation (must match the brush rendering)
-            float r0 = (prev.R / 255f) * ap0;
-            float g0 = (prev.G / 255f) * ap0;
-            float b0 = (prev.B / 255f) * ap0;
-
-            float r1 = (next.R / 255f) * ap1;
-            float g1 = (next.G / 255f) * ap1;
-            float b1 = (next.B / 255f) * ap1;
-
-            float a = Lerp(ap0, ap1, t);
-            float rP = Lerp(r0, r1, t);
-            float gP = Lerp(g0, g1, t);
-            float bP = Lerp(b0, b1, t);
-
-            aOut = (byte)Math.Clamp((int)MathF.Round(a * 255f), 0, 255);
-            rPOut = (byte)Math.Clamp((int)MathF.Round(rP * 255f), 0, 255);
-            gPOut = (byte)Math.Clamp((int)MathF.Round(gP * 255f), 0, 255);
-            bPOut = (byte)Math.Clamp((int)MathF.Round(bP * 255f), 0, 255);
-        }
-
-        private static float Lerp(float a, float b, float t) => a + (b - a) * t;
         #endregion
     }
 }
