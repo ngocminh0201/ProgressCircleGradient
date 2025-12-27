@@ -64,32 +64,42 @@
             </OneUI:ProgressCircleIndeterminate.Foreground>
         </OneUI:ProgressCircleIndeterminate>
 
-        <!--<OneUI:ProgressCircleDeterminate
-            Margin="20,0,0,0"
-            Background="#1917171A"
-            Foreground="#387AFF"
-            Size="XLarge"
-            Value="36" />
+        <!--  Use base control with RenderTransform to show rotated static indeterminate controls  -->
         <OneUI:ProgressCircleIndeterminate
             Margin="20,0,0,0"
-            PointForeground="#3DCC87"
-            Size="XLarge" />
-        <OneUI2:ProgressBar
-            Width="200"
-            Height="20"
-            Margin="20,0,0,0"
-            Background="#1917171A"
-            Foreground="#387AFF"
-            IsIndeterminate="True"
-            Value="36" />
+            RenderTransformOrigin="0.5,0.5"
+            Size="XLarge">
+            <OneUI:ProgressCircleIndeterminate.Foreground>
+                <brushes:ConicGradientBrush />
+            </OneUI:ProgressCircleIndeterminate.Foreground>
+            <OneUI:ProgressCircleIndeterminate.RenderTransform>
+                <RotateTransform Angle="90" />
+            </OneUI:ProgressCircleIndeterminate.RenderTransform>
+        </OneUI:ProgressCircleIndeterminate>
 
-        <OneUI2:ProgressBar
-            Width="200"
-            Height="20"
+        <OneUI:ProgressCircleIndeterminate
             Margin="20,0,0,0"
-            Background="#1917171A"
-            Foreground="#387AFF"
-            IsIndeterminate="False"
-            Value="36" />-->
+            RenderTransformOrigin="0.5,0.5"
+            Size="XLarge">
+            <OneUI:ProgressCircleIndeterminate.Foreground>
+                <brushes:ConicGradientBrush />
+            </OneUI:ProgressCircleIndeterminate.Foreground>
+            <OneUI:ProgressCircleIndeterminate.RenderTransform>
+                <RotateTransform Angle="180" />
+            </OneUI:ProgressCircleIndeterminate.RenderTransform>
+        </OneUI:ProgressCircleIndeterminate>
+
+        <OneUI:ProgressCircleIndeterminate
+            Margin="20,0,0,0"
+            RenderTransformOrigin="0.5,0.5"
+            Size="XLarge">
+            <OneUI:ProgressCircleIndeterminate.Foreground>
+                <brushes:ConicGradientBrush />
+            </OneUI:ProgressCircleIndeterminate.Foreground>
+            <OneUI:ProgressCircleIndeterminate.RenderTransform>
+                <RotateTransform Angle="270" />
+            </OneUI:ProgressCircleIndeterminate.RenderTransform>
+        </OneUI:ProgressCircleIndeterminate>
+
     </StackPanel>
 </Window>

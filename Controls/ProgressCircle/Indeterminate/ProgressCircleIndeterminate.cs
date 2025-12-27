@@ -313,38 +313,44 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
 
         private void BeginAnimationIfVisible()
         {
-            if (Visibility != Visibility.Collapsed)
-            {
-                _rotateAnimation?.Begin();
-            }
+            // Temporarily disable automatic animation start so dots remain static for observation.
+            // No-op: do not call _rotateAnimation.Begin().
         }
+
+        // Allow derived classes to specify an additional initial rotation (degrees).
+        protected virtual double InitialRotationDegrees => 0;
 
         private void ResetAnimationToInitialFrame()
         {
-            // Ensure we sample colors at storyboard time = 0.
+            // For static display: ensure each dot is placed at its intended static position
+            // Top, Right(point), Bottom, Left using the displacement template properties.
             if (_rootGrid?.RenderTransform is RotateTransform rt)
             {
-                rt.Angle = 0;
+                rt.Angle = InitialRotationDegrees;
             }
 
             if (_ellipse01?.RenderTransform is TranslateTransform t1)
             {
+                // Top dot -> move down by positive displacement
                 t1.X = 0;
-                t1.Y = 0;
+                t1.Y = EllipseDisplacementPosition;
             }
             if (_ellipsePoint?.RenderTransform is TranslateTransform t2)
             {
-                t2.X = 0;
+                // Right (point) -> move left by negative displacement
+                t2.X = EllipseNegativeDisplacement;
                 t2.Y = 0;
             }
             if (_ellipse02?.RenderTransform is TranslateTransform t3)
             {
+                // Bottom -> move up by negative displacement
                 t3.X = 0;
-                t3.Y = 0;
+                t3.Y = EllipseNegativeDisplacement;
             }
             if (_ellipse03?.RenderTransform is TranslateTransform t4)
             {
-                t4.X = 0;
+                // Left -> move right by positive displacement
+                t4.X = EllipseDisplacementPosition;
                 t4.Y = 0;
             }
         }
