@@ -6,20 +6,20 @@
     <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Light">
             <SolidColorBrush x:Key="OneUIProgressCircleDeterminateTextForeground" Color="#252528" />
-            <SolidColorBrush x:Key="OneUIProgressCircleDeterminateArcInner" Color="#387AFF" />
-            <SolidColorBrush x:Key="OneUIProgressCircleDeterminateArcOuter" Color="#1919171A" />
+            <SolidColorBrush x:Key="OneUIProgressCircleDeterminateArcInner" Color="#1919171A" />
+            <SolidColorBrush x:Key="OneUIProgressCircleDeterminateArcOuter" Color="#387AFF" />
         </ResourceDictionary>
 
         <ResourceDictionary x:Key="Dark">
             <SolidColorBrush x:Key="OneUIProgressCircleDeterminateTextForeground" Color="#252528" />
-            <SolidColorBrush x:Key="OneUIProgressCircleDeterminateArcInner" Color="#387AFF" />
-            <SolidColorBrush x:Key="OneUIProgressCircleDeterminateArcOuter" Color="#1919171A" />
+            <SolidColorBrush x:Key="OneUIProgressCircleDeterminateArcInner" Color="#1919171A" />
+            <SolidColorBrush x:Key="OneUIProgressCircleDeterminateArcOuter" Color="#387AFF" />
         </ResourceDictionary>
 
         <ResourceDictionary x:Key="HighContrast">
             <SolidColorBrush x:Key="OneUIProgressCircleDeterminateTextForeground" Color="#252528" />
-            <SolidColorBrush x:Key="OneUIProgressCircleDeterminateArcInner" Color="#387AFF" />
-            <SolidColorBrush x:Key="OneUIProgressCircleDeterminateArcOuter" Color="#1919171A" />
+            <SolidColorBrush x:Key="OneUIProgressCircleDeterminateArcInner" Color="#1919171A" />
+            <SolidColorBrush x:Key="OneUIProgressCircleDeterminateArcOuter" Color="#387AFF" />
         </ResourceDictionary>
 
     </ResourceDictionary.ThemeDictionaries>
@@ -76,10 +76,11 @@
                                     </Path.Data>
                                 </Path>
 
-                                <Path
-                                    x:Name="PART_ProgressPath"
+                                <Rectangle
+                                    x:Name="PART_GradientLayer"
+                                    Canvas.Left="0"
+                                    Canvas.Top="0"
                                     Fill="{TemplateBinding Foreground}"
-                                    IsHitTestVisible="False"
                                     Visibility="Collapsed" />
 
                                 <Path

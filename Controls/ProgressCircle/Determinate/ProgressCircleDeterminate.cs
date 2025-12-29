@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
+using Microsoft.Graphics.Canvas;
+using Microsoft.Graphics.Canvas.Geometry;
+using Microsoft.UI.Composition;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Hosting;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Shapes;
-using ProgressCircleGradient.Controls.ProgressCircle;
 using ProgressCircleGradient.Controls.ProgressCircle.Determinate;
 using ProgressCircleGradient.Helpers;
 using Windows.Foundation;
@@ -22,16 +26,16 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
         private const string PART_CANVAS = "PART_canvas";
 
         private const string PART_OUTER_PATH = "PART_OuterPath";
-        private const string PART_INNER_PATH = "PART_InnerPath"; // legacy fallback
+        private const string PART_INNER_PATH = "PART_InnerPath";                 // legacy fallback
         private const string PART_OUTER_PATH_FIGURE = "PART_OuterPathFigure";
-        private const string PART_INNER_PATH_FIGURE = "PART_InnerPathFigure"; // legacy fallback
+        private const string PART_INNER_PATH_FIGURE = "PART_InnerPathFigure";   // legacy fallback
         private const string PART_OUTER_ARC_SEGMENT = "PART_OuterArcSegment";
-        private const string PART_INNER_ARC_SEGMENT = "PART_InnerArcSegment"; // legacy fallback
-        private const string PART_START_ELLIPSE = "PART_startEllipse"; // legacy fallback
-        private const string PART_END_ELLIPSE = "PART_endEllipse";     // legacy fallback
+        private const string PART_INNER_ARC_SEGMENT = "PART_InnerArcSegment";   // legacy fallback
+        private const string PART_START_ELLIPSE = "PART_startEllipse";          // legacy fallback
+        private const string PART_END_ELLIPSE = "PART_endEllipse";              // legacy fallback
 
-        // NEW: progress path filled by ConicGradientBrush (masking via geometry)
-        private const string PART_PROGRESS_PATH = "PART_ProgressPath";
+        // NEW: full-square layer filled by ConicGradientBrush, then clip by geometry
+        private const string PART_GRADIENT_LAYER = "PART_GradientLayer";
 
         private const string RESOURCE_COLOR_ARC_OUTER = "#17171A"; // 10%
         private const string RESOURCE_COLOR_ARC_INNER = "#387AFF";
@@ -52,8 +56,15 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
         private PathFigure _outerPathFigure;
         private ArcSegment _outerArc;
 
-        // Progress (filled)
-        private Path _progressPath;
+        // Gradient layer (full square)
+        private Rectangle _gradientLayer;
+
+        // Composition clip objects
+        private Visual _gradientVisual;
+        private Compositor _compositor;
+        private CompositionPathGeometry _clipPathGeometry;
+        private CompositionGeometricClip _geometricClip;
+        private CanvasGeometry _currentClipGeometry; // keep alive until next update
 
         // Legacy fallback (stroke arc)
         private Path _innerPath;
@@ -64,20 +75,8 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
 
         private TextBlock _text;
 
-        // Reusable geometries for progress segment
-        private PathGeometry _progressGeom;
-        private PathFigure _progressFig;
-        private ArcSegment _segOuter;
-        private ArcSegment _segEndCap;
-        private ArcSegment _segInner;
-        private ArcSegment _segStartCap;
-
-        // Full ring (100%)
-        private GeometryGroup _fullRingGeom;
-        private EllipseGeometry _fullOuterEllipse;
-        private EllipseGeometry _fullInnerEllipse;
-
-        private readonly List<ProgressCircleDeterminateModel> _progressCircleDeterminateModels = new List<ProgressCircleDeterminateModel> {
+        private readonly List<ProgressCircleDeterminateModel> _progressCircleDeterminateModels = new()
+        {
             new ProgressCircleDeterminateModel(){ Type = ProgressCircleDeterminateType.Determinate1, Size = ProgressCircleSize.XLarge, Orientation = ProgressCircleIndeterminateOrientation.Vertical, RadiusSize = 30, Thickness = 10, Margin = new Thickness(7) },
             new ProgressCircleDeterminateModel(){ Type = ProgressCircleDeterminateType.Determinate1, Size = ProgressCircleSize.Large,  Orientation = ProgressCircleIndeterminateOrientation.Vertical, RadiusSize = 21, Thickness = 8,  Margin = new Thickness(5) },
             new ProgressCircleDeterminateModel(){ Type = ProgressCircleDeterminateType.Determinate1, Size = ProgressCircleSize.Medium, Orientation = ProgressCircleIndeterminateOrientation.Vertical, RadiusSize = 17, Thickness = 6,  Margin = new Thickness(4) },
@@ -150,7 +149,7 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
         #endregion
 
         #region Constructors
-        public ProgressCircleDeterminate() : base()
+        public ProgressCircleDeterminate()
         {
             DefaultStyleKey = typeof(ProgressCircleDeterminate);
         }
@@ -165,30 +164,28 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
             _text = (TextBlock)GetTemplateChild(PART_TEXT_NAME);
             _canvas = (Canvas)GetTemplateChild(PART_CANVAS);
 
-            // Track
             _outerPath = GetTemplateChild(PART_OUTER_PATH) as Path;
             _outerPathFigure = GetTemplateChild(PART_OUTER_PATH_FIGURE) as PathFigure;
             _outerArc = GetTemplateChild(PART_OUTER_ARC_SEGMENT) as ArcSegment;
 
-            // Progress filled path (new)
-            _progressPath = GetTemplateChild(PART_PROGRESS_PATH) as Path;
+            _gradientLayer = GetTemplateChild(PART_GRADIENT_LAYER) as Rectangle;
 
-            // Legacy fallback parts (template cũ)
+            // legacy fallback parts
             _innerPath = GetTemplateChild(PART_INNER_PATH) as Path;
             _innerPathFigure = GetTemplateChild(PART_INNER_PATH_FIGURE) as PathFigure;
             _innerArc = GetTemplateChild(PART_INNER_ARC_SEGMENT) as ArcSegment;
             _startEllipse = GetTemplateChild(PART_START_ELLIPSE) as EllipseGeometry;
             _endEllipse = GetTemplateChild(PART_END_ELLIPSE) as EllipseGeometry;
 
-            EnsureProgressGeometries();
+            EnsureGradientClip();
 
             SetControlSize();
             Draw();
 
-            // Safety: nếu template không TemplateBinding
+            // keep consistent even if template binding is wrong
             if (_outerPath != null) _outerPath.Stroke = Background;
-            if (_progressPath != null) _progressPath.Fill = Foreground;
             if (_innerPath != null) _innerPath.Stroke = Foreground;
+            if (_gradientLayer != null) _gradientLayer.Fill = Foreground;
         }
 
         protected override void OnSizePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -219,8 +216,8 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
         {
             if (d is not ProgressCircleDeterminate pc) return;
 
-            if (pc._progressPath != null)
-                pc._progressPath.Fill = (Brush)e.NewValue;
+            if (pc._gradientLayer != null)
+                pc._gradientLayer.Fill = (Brush)e.NewValue;
 
             // legacy fallback
             if (pc._innerPath != null)
@@ -229,12 +226,30 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
 
         private static void OnBackgroundPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is ProgressCircleDeterminate pc && pc._outerPath != null)
+            if (d is not ProgressCircleDeterminate pc) return;
+
+            if (pc._outerPath != null)
                 pc._outerPath.Stroke = (Brush)e.NewValue;
         }
         #endregion
 
         #region Private Methods
+        private void EnsureGradientClip()
+        {
+            if (_gradientLayer == null)
+                return;
+
+            if (_gradientVisual == null)
+                _gradientVisual = ElementCompositionPreview.GetElementVisual(_gradientLayer);
+
+            _compositor ??= _gradientVisual.Compositor;
+
+            _clipPathGeometry ??= _compositor.CreatePathGeometry();
+            _geometricClip ??= _compositor.CreateGeometricClip(_clipPathGeometry);
+
+            _gradientVisual.Clip = _geometricClip;
+        }
+
         private void Draw()
         {
             if (_canvas == null)
@@ -246,20 +261,21 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
             // Track always
             UpdateTrackGeometry(center, Radius);
 
-            // New masking path
-            if (_progressPath != null)
+            // Preferred path: full-square gradient + composition clip
+            if (_gradientLayer != null)
             {
-                UpdateProgressPathGeometry(center, angle);
-                // Hide legacy if exists
+                UpdateGradientClip(center, Radius, angle);
+
+                // hide legacy if exists
                 if (_innerPath != null) _innerPath.Visibility = Visibility.Collapsed;
                 return;
             }
 
-            // Legacy fallback (old template)
+            // Legacy fallback (old stroke-based arc)
             if (_innerPath == null || _innerPathFigure == null || _innerArc == null)
                 return;
 
-            _innerPath.Visibility = (Value <= 0) ? Visibility.Collapsed : Visibility.Visible;
+            _innerPath.Visibility = (Value <= 0 || angle <= 0.001) ? Visibility.Collapsed : Visibility.Visible;
             UpdateLegacyInnerArc(center, Radius, angle);
         }
 
@@ -268,13 +284,29 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
             if (_canvas == null)
                 return;
 
-            _canvas.Width = Radius * 2 + Thickness;
-            _canvas.Height = Radius * 2 + Thickness;
+            double side = Radius * 2 + Thickness;
 
-            if (_progressPath != null)
+            _canvas.Width = side;
+            _canvas.Height = side;
+
+            if (_gradientLayer != null)
             {
-                _progressPath.Width = _canvas.Width;
-                _progressPath.Height = _canvas.Height;
+                _gradientLayer.Width = side;
+                _gradientLayer.Height = side;
+            }
+
+            if (_outerPath != null)
+            {
+                _outerPath.Width = side;
+                _outerPath.Height = side;
+                _outerPath.StrokeThickness = Thickness;
+            }
+
+            if (_innerPath != null)
+            {
+                _innerPath.Width = side;
+                _innerPath.Height = side;
+                _innerPath.StrokeThickness = Thickness;
             }
         }
 
@@ -282,25 +314,6 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
         {
             return new Point(Radius + Thickness / 2, Radius + Thickness / 2);
         }
-
-        //private double GetAngle()
-        //{
-        //    double v = Value;
-        //    if (v < 0) v = 0;
-        //    if (v > 100) v = 100;
-
-        //    if (v <= 0) return 0;
-
-        //    // Ép full vòng khi gần 100% (tránh float/animation làm không đúng 100)
-        //    if (v >= 99.95) return 360.0;
-
-        //    // Không dùng correction nữa cho determinate fill (mask)
-        //    double angle = v / 100.0 * 360.0;
-
-        //    // đảm bảo không chạm đúng 360 để không gây edge-case ở arc math (nhưng vẫn < 360)
-        //    return Math.Min(angle, 359.999);
-        //}
-
 
         private double GetAngle()
         {
@@ -310,16 +323,13 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
 
             if (v <= 0) return 0;
 
-            // 100%: vẽ full ring để không hở
+            // IMPORTANT: 100% phải full vòng để không hở
             if (v >= 100) return 360.0;
 
-            // <100%: dùng đúng logic cũ (correction factor) để tránh “đuôi đè lên đầu”
+            // <100% giữ logic cũ để tránh tail đè head
             double angle = v * CIRCLE_CENTER_TO_BORDER_CORRECTION_FACTOR / 100.0 * 360.0;
-
-            // tránh đúng 360 trong nhánh segment
             return Math.Min(angle, 359.999);
         }
-
 
         private void UpdateTrackGeometry(Point centerPoint, double radius)
         {
@@ -327,10 +337,6 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
                 return;
 
             var circleStart = new Point(centerPoint.X, centerPoint.Y - radius);
-
-            _outerPath.Width = Radius * 2 + Thickness;
-            _outerPath.Height = Radius * 2 + Thickness;
-            _outerPath.StrokeThickness = Thickness;
 
             _outerPathFigure.StartPoint = circleStart;
             _outerPathFigure.IsClosed = false;
@@ -341,119 +347,67 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
             _outerArc.SweepDirection = SweepDirection.Clockwise;
         }
 
-        private void EnsureProgressGeometries()
+        private void UpdateGradientClip(Point centerPoint, double radius, double angle)
         {
-            if (_progressGeom == null)
-            {
-                _segOuter = new ArcSegment();
-                _segEndCap = new ArcSegment();
-                _segInner = new ArcSegment();
-                _segStartCap = new ArcSegment();
-
-                _progressFig = new PathFigure
-                {
-                    IsClosed = true,
-                    IsFilled = true,
-                    Segments = new PathSegmentCollection
-                    {
-                        _segOuter,
-                        _segEndCap,
-                        _segInner,
-                        _segStartCap
-                    }
-                };
-
-                _progressGeom = new PathGeometry
-                {
-                    FillRule = FillRule.Nonzero,
-                    Figures = new PathFigureCollection { _progressFig }
-                };
-            }
-
-            if (_fullRingGeom == null)
-            {
-                _fullOuterEllipse = new EllipseGeometry();
-                _fullInnerEllipse = new EllipseGeometry();
-
-                _fullRingGeom = new GeometryGroup { FillRule = FillRule.EvenOdd };
-                _fullRingGeom.Children.Add(_fullOuterEllipse);
-                _fullRingGeom.Children.Add(_fullInnerEllipse);
-            }
-        }
-
-        private void UpdateProgressPathGeometry(Point centerPoint, double angle)
-        {
-            EnsureProgressGeometries();
-            if (_progressPath == null)
+            EnsureGradientClip();
+            if (_clipPathGeometry == null || _gradientLayer == null)
                 return;
 
             if (Value <= 0 || angle <= 0.001)
             {
-                _progressPath.Visibility = Visibility.Collapsed;
-                _progressPath.Data = null;
+                _gradientLayer.Visibility = Visibility.Collapsed;
+                _clipPathGeometry.Path = null;
+                _currentClipGeometry?.Dispose();
+                _currentClipGeometry = null;
                 return;
             }
 
-            _progressPath.Visibility = Visibility.Visible;
+            _gradientLayer.Visibility = Visibility.Visible;
 
-            double capR = Thickness / 2.0;
-            double rOuter = Radius + capR;
-            double rInner = Math.Max(0.0, Radius - capR);
-
-            // Full ring (near 100%)
-            if (angle >= 359.99)
+            var device = CanvasDevice.GetSharedDevice();
+            var strokeStyle = new CanvasStrokeStyle
             {
-                _fullOuterEllipse.Center = centerPoint;
-                _fullOuterEllipse.RadiusX = rOuter;
-                _fullOuterEllipse.RadiusY = rOuter;
+                StartCap = CanvasCapStyle.Round,
+                EndCap = CanvasCapStyle.Round
+            };
 
-                _fullInnerEllipse.Center = centerPoint;
-                _fullInnerEllipse.RadiusX = rInner;
-                _fullInnerEllipse.RadiusY = rInner;
+            _currentClipGeometry?.Dispose();
+            _currentClipGeometry = null;
 
-                _progressPath.Data = _fullRingGeom;
-                return;
+            if (angle >= 359.999)
+            {
+                // Full ring: stroke a full circle
+                var circle = CanvasGeometry.CreateCircle(device, ToVector2(centerPoint), (float)radius);
+                _currentClipGeometry = circle.Stroke((float)Thickness, strokeStyle);
+            }
+            else
+            {
+                // Build centerline arc then stroke it => exactly the ring segment with round caps
+                var start = ToVector2(ScaleUnitCirclePoint(centerPoint, 0, radius));
+                var end = ToVector2(ScaleUnitCirclePoint(centerPoint, angle, radius));
+
+                var pb = new CanvasPathBuilder(device);
+                pb.BeginFigure(start);
+                pb.AddArc(
+                    end,
+                    (float)radius,
+                    (float)radius,
+                    0f,
+                    CanvasSweepDirection.Clockwise,
+                    angle > 180.0 ? CanvasArcSize.Large : CanvasArcSize.Small);
+                pb.EndFigure(CanvasFigureLoop.Open);
+
+                var arc = CanvasGeometry.CreatePath(pb);
+                _currentClipGeometry = arc.Stroke((float)Thickness, strokeStyle);
             }
 
-            // Segment with round caps
-            var outerStart = ScaleUnitCirclePoint(centerPoint, 0, rOuter);
-            var outerEnd = ScaleUnitCirclePoint(centerPoint, angle, rOuter);
-            var innerEnd = ScaleUnitCirclePoint(centerPoint, angle, rInner);
-            var innerStart = ScaleUnitCirclePoint(centerPoint, 0, rInner);
-
-            _progressFig.StartPoint = outerStart;
-
-            _segOuter.Point = outerEnd;
-            _segOuter.Size = new Size(rOuter, rOuter);
-            _segOuter.IsLargeArc = angle > 180.0;
-            _segOuter.SweepDirection = SweepDirection.Clockwise;
-
-            _segEndCap.Point = innerEnd;
-            _segEndCap.Size = new Size(capR, capR);
-            _segEndCap.IsLargeArc = false;
-            _segEndCap.SweepDirection = SweepDirection.Clockwise;
-
-            _segInner.Point = innerStart;
-            _segInner.Size = new Size(rInner, rInner);
-            _segInner.IsLargeArc = angle > 180.0;
-            _segInner.SweepDirection = SweepDirection.Counterclockwise;
-
-            _segStartCap.Point = outerStart;
-            _segStartCap.Size = new Size(capR, capR);
-            _segStartCap.IsLargeArc = false;
-            _segStartCap.SweepDirection = SweepDirection.Clockwise;
-
-            _progressPath.Data = _progressGeom;
+            _clipPathGeometry.Path = new CompositionPath(_currentClipGeometry);
         }
 
         // Legacy fallback (old stroke-based arc)
         private void UpdateLegacyInnerArc(Point centerPoint, double radius, double angle)
         {
             var circleStart = new Point(centerPoint.X, centerPoint.Y - radius);
-
-            _innerPath.Width = Radius * 2 + Thickness;
-            _innerPath.Height = Radius * 2 + Thickness;
-            _innerPath.StrokeThickness = Thickness;
 
             _innerPathFigure.StartPoint = circleStart;
             _innerPathFigure.IsClosed = false;
@@ -489,12 +443,12 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
                 origin.Y - Math.Cos(RADIANS * angle) * radius);
         }
 
+        private static Vector2 ToVector2(Point p) => new((float)p.X, (float)p.Y);
+
         private static void OnTypePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is ProgressCircleDeterminate progressCircleDeterminate)
-            {
-                progressCircleDeterminate.UpdateSize();
-            }
+            if (d is ProgressCircleDeterminate pc)
+                pc.UpdateSize();
         }
 
         private void UpdateSize()
@@ -515,6 +469,9 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
             SetCanvasMargin(progress.Margin);
             SetTextAlignment(progress.Orientation);
             UpdateFontSizeMessage(progress);
+
+            SetControlSize();
+            Draw();
         }
 
         private void UpdateFontSizeMessage(ProgressCircleDeterminateModel progressDefinition)
@@ -528,7 +485,7 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
                 return;
             }
 
-            var fontSizeToken = progressDefinition.RadiusSize switch
+            _text.FontSize = progressDefinition.RadiusSize switch
             {
                 GRIDSIZE_XL => 13,
                 GRIDSIZE_LG => 13,
@@ -537,7 +494,6 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
                 GRIDSIZE_ST => 11,
                 _ => 13
             };
-            _text.FontSize = fontSizeToken;
         }
 
         private void SetCanvasMargin(Thickness margin)
@@ -549,9 +505,7 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
         private void SetTextAlignment(ProgressCircleIndeterminateOrientation orientation)
         {
             if (_progressCircleTextAlingmentDictionary.TryGetValue(orientation, out string alignment))
-            {
                 VisualStateManager.GoToState(this, alignment, true);
-            }
         }
         #endregion
     }
