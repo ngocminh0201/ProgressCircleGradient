@@ -135,7 +135,7 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
         #endregion
 
         #region Constructors
-        public ProgressCircleIndeterminate()
+        public ProgressCircleIndeterminate() : base()
         {
             DefaultStyleKey = typeof(ProgressCircleIndeterminate);
             Loaded += ProgressCircleIndeterminate_Loaded;
@@ -161,9 +161,6 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
             UpdateProgressCircleLayout();
             UpdateCircleScale();
 
-            // Apply dot colors based on the current Foreground/PointForeground.
-            // If either property is a ConicGradientBrush, all 4 dots will "sample" colors at t=0
-            // and then keep those colors while rotating.
             UpdateDotBrushesAndMaybeRestartAnimation(restartAnimation: true);
         }
 
@@ -172,7 +169,6 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
             UpdateCircleScale();
             UpdateProgressCircleLayout();
 
-            // Size changes => sampling points change.
             UpdateDotBrushesAndMaybeRestartAnimation(restartAnimation: true);
         }
         #endregion
@@ -207,11 +203,9 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
 
         private void ThemeSettings_Changed(ThemeSettings sender, object args)
         {
-            // If we're freezing colors from ConicGradientBrush, theme doesn't matter here.
             if (_isUsingFrozenConicColors)
                 return;
 
-            // Re-apply defaults if Foreground/PointForeground is Transparent.
             ApplyNormalDotBrushes();
         }
 
@@ -243,7 +237,6 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
                 }
                 else
                 {
-                    // Ensure correct colors are applied before resuming.
                     self.UpdateDotBrushesAndMaybeRestartAnimation(restartAnimation: true);
                 }
             }
@@ -298,7 +291,7 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
             if (_text == null)
                 return;
 
-            var fontSizeToken = progressDefinition.GridSize switch
+            _text.FontSize = progressDefinition.GridSize switch
             {
                 GRIDSIZE_XL => 13,
                 GRIDSIZE_LG => 13,
@@ -307,8 +300,6 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
                 GRIDSIZE_ST => 11,
                 _ => 13
             };
-
-            _text.FontSize = fontSizeToken;
         }
 
         private void BeginAnimationIfVisible()
@@ -321,7 +312,6 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
 
         private void ResetAnimationToInitialFrame()
         {
-            // Ensure we sample colors at storyboard time = 0.
             if (_rootGrid?.RenderTransform is RotateTransform rt)
             {
                 rt.Angle = 0;
@@ -378,9 +368,8 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
             }
         }
 
-        private ConicGradientBrush GetConicBrushSourceOrNull()
+        private ConicGradientBrush? GetConicBrushSourceOrNull()
         {
-            // Allow the user to set the conic brush via either Foreground or PointForeground.
             if (PointForeground is ConicGradientBrush c1)
                 return c1;
             if (Foreground is ConicGradientBrush c2)
@@ -390,18 +379,14 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
 
         private bool TryApplyFrozenConicColors()
         {
-            var conic = GetConicBrushSourceOrNull();
-            if (conic == null)
+            if (GetConicBrushSourceOrNull() == null)
                 return false;
 
-            // Determine the coordinate space used by the ConicGradientBrush.
-            // The brush is stretched to fill the target bounds, so sampling by angle is stable.
             double w = (_rootGrid != null && _rootGrid.ActualWidth > 0) ? _rootGrid.ActualWidth : (_rootGrid?.Width ?? 0);
             double h = (_rootGrid != null && _rootGrid.ActualHeight > 0) ? _rootGrid.ActualHeight : (_rootGrid?.Height ?? 0);
 
             if (w <= 0 || h <= 0)
             {
-                // Fallback to the model's intended size.
                 var def = _progressCircleIndeterminateModels.FirstOrDefault(x => x.Size == Size);
                 if (def != null)
                 {
@@ -420,20 +405,16 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
             double d = EllipseDiameter;
             double m = EllipseMinOffset;
 
-            // Centers at storyboard t=0 (TranslateTransform = 0)
-            // Top, Right(point), Bottom, Left
             var top = new Windows.Foundation.Point(cx, m + d * 0.5);
             var right = new Windows.Foundation.Point(w - m - d * 0.5, cy);
             var bottom = new Windows.Foundation.Point(cx, h - m - d * 0.5);
             var left = new Windows.Foundation.Point(m + d * 0.5, cy);
 
-            // Use the ConicGradientBrush.SampleColorAtPoint to sample colors at these points
             Color cTop = ConicGradientBrush.SampleColorAtPoint(top, cx, cy);
             Color cRight = ConicGradientBrush.SampleColorAtPoint(right, cx, cy);
             Color cBottom = ConicGradientBrush.SampleColorAtPoint(bottom, cx, cy);
             Color cLeft = ConicGradientBrush.SampleColorAtPoint(left, cx, cy);
 
-            // Freeze: each dot becomes a SolidColorBrush so it keeps the same color while moving.
             _ellipse01.Fill = new SolidColorBrush(cTop);
             _ellipsePoint.Fill = new SolidColorBrush(cRight);
             _ellipse02.Fill = new SolidColorBrush(cBottom);
@@ -447,12 +428,10 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
             Brush normalBrush = ResolveBrushOrDefault(_elipseIndeterminateBrushDefault, ELLIPSE_INDETERMINATE_KEY);
             Brush pointBrush = ResolveBrushOrDefault(_variantElipseIndeterminateBrushDefault, VARIANT_ELLIPSE_INDETERMINATE_KEY);
 
-            // 3 dots
             if (_ellipse01 != null) _ellipse01.Fill = normalBrush;
             if (_ellipse02 != null) _ellipse02.Fill = normalBrush;
             if (_ellipse03 != null) _ellipse03.Fill = normalBrush;
 
-            // point dot
             if (_ellipsePoint != null) _ellipsePoint.Fill = pointBrush;
         }
 

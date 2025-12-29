@@ -3,10 +3,8 @@ using Microsoft.Graphics.Canvas.UI.Composition;
 using Microsoft.Graphics.DirectX;
 using Microsoft.UI;
 using Microsoft.UI.Composition;
-using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using System;
-using System.Numerics;
 using Windows.Foundation;
 using Windows.UI;
 
@@ -15,6 +13,7 @@ namespace ProgressCircleGradient.Brushes
     public sealed partial class ConicGradientBrush : XamlCompositionBrushBase
     {
         private const int FixedResolution = 2048;
+        private const float InitialAngleOffset = -46.2f;
 
         private Compositor? _compositor;
         private CompositionGraphicsDevice? _graphicsDevice;
@@ -25,25 +24,25 @@ namespace ProgressCircleGradient.Brushes
         {
             public readonly float AngleDeg;
             public readonly byte A, R, G, B;
+
             public Stop(float angleDeg, byte a, byte r, byte g, byte b)
             {
                 AngleDeg = angleDeg;
-                A = a; R = r; G = g; B = b;
+                A = a;
+                R = r;
+                G = g;
+                B = b;
             }
         }
 
-        const float delta = 0f;
-        // Figma stops: 6 colors with Angular gradient (0° at 6 o'clock, clockwise)
-        // Conversion: percentage to degrees = percentage * 3.6
-        // Example: 7% = 7 * 3.6 = 25.2°
         private static readonly Stop[] Stops =
         [
-            new Stop( 25.2f + delta, 0x99, 0x38, 0x7A, 0xFF), // #387AFF @ 60% (7% stops)
-            new Stop( 72.0f + delta, 0xE6, 0x3C, 0xB9, 0xA2), // #3CB9A2 @ 90% (20% stops)
-            new Stop(136.8f + delta, 0xE6, 0x3D, 0xCC, 0x87), // #3DCC87 @ 90% (38% stops)
-            new Stop(208.8f + delta, 0xE6, 0x38, 0x7A, 0xFF), // #387AFF @ 90% (58% stops)
-            new Stop(306.0f + delta, 0x99, 0x3B, 0xA3, 0xC3), // #3BA3C3 @ 60% (85% stops)
-            new Stop(345.6f + delta, 0x99, 0x3D, 0xCC, 0x87), // #3DCC87 @ 60% (96% stops)
+            new Stop(25.2f, 0x99, 0x38, 0x7A, 0xFF),
+            new Stop(72.0f, 0xE6, 0x3C, 0xB9, 0xA2),
+            new Stop(136.8f, 0xE6, 0x3D, 0xCC, 0x87),
+            new Stop(208.8f, 0xE6, 0x38, 0x7A, 0xFF),
+            new Stop(306.0f, 0x99, 0x3B, 0xA3, 0xC3),
+            new Stop(345.6f, 0x99, 0x3D, 0xCC, 0x87),
         ];
 
         protected override void OnConnected()
@@ -79,24 +78,10 @@ namespace ProgressCircleGradient.Brushes
             _compositor = null;
         }
 
-        private void RebuildIfConnected()
-        {
-            if (CompositionBrush == null || _graphicsDevice == null)
-                return;
-
-            CreateOrResizeSurface();
-            Redraw();
-
-            if (_surfaceBrush != null && _surface != null)
-                _surfaceBrush.Surface = _surface;
-        }
-
         private void CreateOrResizeSurface()
         {
-            int res = FixedResolution;
-
             _surface = _graphicsDevice!.CreateDrawingSurface(
-                new Size(res, res),
+                new Size(FixedResolution, FixedResolution),
                 DirectXPixelFormat.B8G8R8A8UIntNormalized,
                 DirectXAlphaMode.Premultiplied);
         }
@@ -106,15 +91,14 @@ namespace ProgressCircleGradient.Brushes
             if (_surface == null)
                 return;
 
-            int res = FixedResolution;
-            var bytes = BuildConicGradientPixelsPremultipliedBGRA(res, res);
-
+            var bytes = BuildConicGradientPixelsPremultipliedBGRA(FixedResolution, FixedResolution);
             var device = CanvasDevice.GetSharedDevice();
+
             using var bitmap = CanvasBitmap.CreateFromBytes(
                 device,
                 bytes,
-                res,
-                res,
+                FixedResolution,
+                FixedResolution,
                 (Windows.Graphics.DirectX.DirectXPixelFormat)DirectXPixelFormat.B8G8R8A8UIntNormalized);
 
             using var ds = CanvasComposition.CreateDrawingSession(_surface);
@@ -124,23 +108,18 @@ namespace ProgressCircleGradient.Brushes
 
         /// <summary>
         /// Sample the conic gradient color at a specific point in the coordinate space.
-        /// Public so other controls can sample the brush.
         /// </summary>
         public static Color SampleColorAtPoint(Windows.Foundation.Point point, double centerX, double centerY)
         {
             float px = (float)(point.X - centerX);
             float py = (float)(point.Y - centerY);
 
-            // 0° at 6 o'clock (down), increasing clockwise => atan2(-x, y)
             float rad = MathF.Atan2(-px, py);
             if (rad < 0)
                 rad += MathF.PI * 2f;
 
             float angleDeg = rad * (180f / MathF.PI);
-
-            // Apply initial offset only
-            const float initialAngleOffset = -46.2f;
-            angleDeg = (angleDeg + initialAngleOffset) % 360f;
+            angleDeg = (angleDeg + InitialAngleOffset) % 360f;
             if (angleDeg < 0)
                 angleDeg += 360f;
 
@@ -149,7 +128,6 @@ namespace ProgressCircleGradient.Brushes
             if (a == 0)
                 return Colors.Transparent;
 
-            // Un-premultiply so SolidColorBrush renders the same visual color
             float af = a / 255f;
             byte r = (byte)Math.Clamp((int)MathF.Round(rP / af), 0, 255);
             byte g = (byte)Math.Clamp((int)MathF.Round(gP / af), 0, 255);
@@ -158,17 +136,12 @@ namespace ProgressCircleGradient.Brushes
             return Color.FromArgb(a, r, g, b);
         }
 
-        /// <summary>
-        /// Output: premultiplied BGRA bytes for B8G8R8A8.
-        /// </summary>
         private static byte[] BuildConicGradientPixelsPremultipliedBGRA(int width, int height)
         {
             var buffer = new byte[width * height * 4];
 
             float cx = width * 0.5f;
             float cy = height * 0.5f;
-
-            const float initialAngleOffset = -46.2f;
 
             int idx = 0;
             for (int y = 0; y < height; y++)
@@ -179,17 +152,17 @@ namespace ProgressCircleGradient.Brushes
                 {
                     float px = (x + 0.5f) - cx;
 
-                    // 0° at 6 o'clock (down), increasing clockwise => atan2(-x, y)
                     float rad = MathF.Atan2(-px, py);
-                    if (rad < 0) rad += MathF.PI * 2f;
+                    if (rad < 0) 
+                        rad += MathF.PI * 2f;
 
                     float angleDeg = rad * (180f / MathF.PI);
-                    angleDeg = (angleDeg + initialAngleOffset) % 360f;
-                    if (angleDeg < 0) angleDeg += 360f;
+                    angleDeg = (angleDeg + InitialAngleOffset) % 360f;
+                    if (angleDeg < 0) 
+                        angleDeg += 360f;
 
                     EvaluateColorAtAnglePremultiplied(angleDeg, out byte a, out byte rP, out byte gP, out byte bP);
 
-                    // BGRA
                     buffer[idx++] = bP;
                     buffer[idx++] = gP;
                     buffer[idx++] = rP;
@@ -203,7 +176,8 @@ namespace ProgressCircleGradient.Brushes
         private static void EvaluateColorAtAnglePremultiplied(float angleDeg, out byte aOut, out byte rPOut, out byte gPOut, out byte bPOut)
         {
             angleDeg %= 360f;
-            if (angleDeg < 0) angleDeg += 360f;
+            if (angleDeg < 0) 
+                angleDeg += 360f;
 
             Stop prev, next;
             float prevAngle, nextAngle;

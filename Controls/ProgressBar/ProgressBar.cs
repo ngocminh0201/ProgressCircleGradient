@@ -10,7 +10,7 @@ using Application = Microsoft.UI.Xaml.Application;
 
 namespace ProgressCircleGradient.Controls.ProgressBar
 {
-    public sealed class ProgressBar : Microsoft.UI.Xaml.Controls.ProgressBar
+    public sealed partial class ProgressBar : Microsoft.UI.Xaml.Controls.ProgressBar
     {
         #region Constants
         private const string PART_ANIMATION = "IndeterminateAnimation";
@@ -26,6 +26,9 @@ namespace ProgressCircleGradient.Controls.ProgressBar
         private Storyboard _indeterminateAnimation;
         private TextBlock _progressText;
         private Rectangle _progressBarIndicator;
+        private LinearGradientBrush? _fixedGradientBrush;
+        private MatrixTransform? _fixedGradientTransform;
+
         #endregion
 
         #region DependencyProperty
@@ -55,6 +58,7 @@ namespace ProgressCircleGradient.Controls.ProgressBar
             get => (string)GetValue(TextProperty);
             set => SetValue(TextProperty, value);
         }
+
         public static readonly DependencyProperty TextProperty =
             DependencyProperty.Register(nameof(Text), typeof(string), typeof(ProgressBar), new PropertyMetadata(null, OnTextPropertyChanged));
         #endregion
@@ -79,38 +83,37 @@ namespace ProgressCircleGradient.Controls.ProgressBar
                 _indeterminateAnimation.Stop();
 
                 var doubleAnimationB1 = _indeterminateAnimation.Children[0] as DoubleAnimationUsingKeyFrames;
-                doubleAnimationB1.KeyFrames.Clear();
+                doubleAnimationB1?.KeyFrames.Clear();
                 var B1InitialkeyFrame = CreateSplineDoubleKeyFrame(0, -1.448);
                 var B1FinalKeyFrame = CreateSplineDoubleKeyFrame(1.280, 1.096);
-                doubleAnimationB1.KeyFrames.Add(B1InitialkeyFrame);
-                doubleAnimationB1.KeyFrames.Add(B1FinalKeyFrame);
+                doubleAnimationB1?.KeyFrames.Add(B1InitialkeyFrame);
+                doubleAnimationB1?.KeyFrames.Add(B1FinalKeyFrame);
 
                 var doubleAnimationB2 = _indeterminateAnimation.Children[1] as DoubleAnimationUsingKeyFrames;
-                doubleAnimationB2.KeyFrames.Clear();
+                doubleAnimationB2?.KeyFrames.Clear();
                 var B2InitialkeyFrame = CreateSplineDoubleKeyFrame(0.350, -0.537);
                 var B2FinalKeyFrame = CreateSplineDoubleKeyFrame(1.550, 1.048);
-                doubleAnimationB2.KeyFrames.Add(B2InitialkeyFrame);
-                doubleAnimationB2.KeyFrames.Add(B2FinalKeyFrame);
+                doubleAnimationB2?.KeyFrames.Add(B2InitialkeyFrame);
+                doubleAnimationB2?.KeyFrames.Add(B2FinalKeyFrame);
 
                 var doubleAnimationB3 = _indeterminateAnimation.Children[2] as DoubleAnimationUsingKeyFrames;
-                doubleAnimationB3.KeyFrames.Clear();
+                doubleAnimationB3?.KeyFrames.Clear();
                 var B3InitialkeyFrame = CreateSplineDoubleKeyFrame(0.500, -0.281);
                 var B3FinalKeyFrame = CreateSplineDoubleKeyFrame(1.750, 1.015);
-                doubleAnimationB3.KeyFrames.Add(B3InitialkeyFrame);
-                doubleAnimationB3.KeyFrames.Add(B3FinalKeyFrame);
+                doubleAnimationB3?.KeyFrames.Add(B3InitialkeyFrame);
+                doubleAnimationB3?.KeyFrames.Add(B3FinalKeyFrame);
 
                 var doubleAnimationB4 = _indeterminateAnimation.Children[3] as DoubleAnimationUsingKeyFrames;
-                doubleAnimationB4.KeyFrames.Clear();
+                doubleAnimationB4?.KeyFrames.Clear();
                 var B4InitialkeyFrame = CreateSplineDoubleKeyFrame(0.666, -0.015);
                 var B4FinalKeyFrame = CreateSplineDoubleKeyFrame(1.916, 1.015);
-                doubleAnimationB4.KeyFrames.Add(B4InitialkeyFrame);
-                doubleAnimationB4.KeyFrames.Add(B4FinalKeyFrame);
+                doubleAnimationB4?.KeyFrames.Add(B4InitialkeyFrame);
+                doubleAnimationB4?.KeyFrames.Add(B4FinalKeyFrame);
 
                 _indeterminateAnimation.Begin();
                 _indeterminateAnimation.Completed += IndeterminateAnimation_Completed;
                 _indeterminateAnimation.RepeatBehavior = new RepeatBehavior(1);
             }
-
         }
 
         private SplineDoubleKeyFrame CreateSplineDoubleKeyFrame(double initialTime, double value)
@@ -150,32 +153,17 @@ namespace ProgressCircleGradient.Controls.ProgressBar
 
         #region Internal Events
 
-        /// <summary>
-        /// This event is necessary for WinUI.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void ProgressBar_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             ForceUpdateProgressIndicator();
             SetAnimation();
         }
 
-        /// <summary>
-        /// This event is necessary for WinUI.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void ProgressBar_Loaded(object sender, RoutedEventArgs e)
         {
             ValueChanged += ProgressBar_ValueChanged;
         }
 
-        /// <summary>
-        /// This event is necessary for WinUI.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void ProgressBar_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
         {
             ForceUpdateProgressIndicator();
@@ -198,6 +186,73 @@ namespace ProgressCircleGradient.Controls.ProgressBar
         #endregion
 
         #region PrivateMethods
+        private static LinearGradientBrush CloneLinearGradientBrush(LinearGradientBrush src)
+        {
+            var clone = new LinearGradientBrush
+            {
+                StartPoint = src.StartPoint,
+                EndPoint = src.EndPoint,
+                Opacity = src.Opacity,
+                SpreadMethod = src.SpreadMethod
+            };
+
+            foreach (var gs in src.GradientStops)
+            {
+                clone.GradientStops.Add(new GradientStop
+                {
+                    Color = gs.Color,
+                    Offset = gs.Offset
+                });
+            }
+
+            return clone;
+        }
+
+        private void FixDeterminateGradientMapping()
+        {
+            if (IsIndeterminate)
+                return;
+
+            _progressBarIndicator ??= GetTemplateChild(PROGRESS_BAR_INDICATOR) as Rectangle;
+            if (_progressBarIndicator == null)
+                return;
+
+            if (_progressBarIndicator.Fill is not LinearGradientBrush current)
+            {
+                _fixedGradientBrush = null;
+                _fixedGradientTransform = null;
+                return;
+            }
+
+            if (!ReferenceEquals(current, _fixedGradientBrush))
+            {
+                _fixedGradientBrush = CloneLinearGradientBrush(current);
+                _fixedGradientTransform = new MatrixTransform();
+                _fixedGradientBrush.RelativeTransform = _fixedGradientTransform;
+                _progressBarIndicator.Fill = _fixedGradientBrush;
+            }
+
+            if (Math.Abs(_fixedGradientBrush.StartPoint.Y - _fixedGradientBrush.EndPoint.Y) < 0.000001)
+            {
+                double ratio = (Maximum > 0) ? (Value / Maximum) : 0.0;
+                ratio = Math.Clamp(ratio, 0.00001, 1.0);
+
+                _fixedGradientTransform.Matrix = new Matrix
+                {
+                    M11 = 1.0 / ratio,
+                    M12 = 0,
+                    M21 = 0,
+                    M22 = 1,
+                    OffsetX = 0,
+                    OffsetY = 0
+                };
+            }
+            else
+            {
+                _fixedGradientBrush.RelativeTransform = null;
+            }
+        }
+
         private void ApplyMaskBrush()
         {
             if (IsIndeterminate)
@@ -209,23 +264,10 @@ namespace ProgressCircleGradient.Controls.ProgressBar
 
             if (MaskBrush != null)
             {
-                // Chỉ vùng value mới vẽ -> Fill bằng gradient
                 _progressBarIndicator.Fill = MaskBrush;
-            }
-            else
-            {
-                // Trả về mặc định: bind lại Foreground (như template đang làm)
-                //_progressBarIndicator.SetBinding(Shape.FillProperty, new Binding
-                //{
-                //    RelativeSource = new RelativeSource(RelativeSourceMode.TemplatedParent),
-                //    Path = new PropertyPath(nameof(Foreground))
-                //});
             }
         }
 
-        /// <summary>
-        /// For WinUI, this events are necessary to assign.
-        /// </summary>
         private void AssignInternalEvents()
         {
             Loaded += ProgressBar_Loaded;
@@ -233,24 +275,18 @@ namespace ProgressCircleGradient.Controls.ProgressBar
             Unloaded += ProgressBar_Unloaded;
         }
 
-        /// <summary>
-        /// For WinUI, it's necessary force update progress indicator.
-        /// </summary>
         private void ForceUpdateProgressIndicator()
         {
             UpdateIndicatorElement();
         }
 
-        /* 
-         * The animation runs once, if the animation is run in forever mode, strange behavior happens, the bar starts to miscalculate
-        This way we forced runs once ever after completed
-        */
         protected override void OnApplyTemplate()
         {
             base.OnApplyTemplate();
             InitiateIndeterminateAnimation();
             UpdateStyle();
             ApplyMaskBrush();
+            FixDeterminateGradientMapping();
             UpdateLayoutProgressText();
         }
 
@@ -295,6 +331,7 @@ namespace ProgressCircleGradient.Controls.ProgressBar
                 if (_progressBarIndicator != null && Maximum > 0)
                 {
                     _progressBarIndicator.Width = ActualWidth * (Value / Maximum);
+                    FixDeterminateGradientMapping();
                 }
             }
         }

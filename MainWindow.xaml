@@ -33,16 +33,26 @@
                 FontSize="20"
                 FontWeight="Bold"
                 Text="ConicGradientBrush" />
-            <Border
-                Width="160"
-                Height="160"
+            <StackPanel
                 HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                CornerRadius="14">
-                <Border.Background>
-                    <brushes:ConicGradientBrush />
-                </Border.Background>
-            </Border>
+                Orientation="Horizontal"
+                Spacing="20">
+                <Border
+                    Width="160"
+                    Height="160"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    CornerRadius="14">
+                    <Border.Background>
+                        <brushes:ConicGradientBrush />
+                    </Border.Background>
+                </Border>
+                <Image
+                    Width="160"
+                    Height="160"
+                    Source="/Brushes/Rectangle 1297.png" />
+            </StackPanel>
+
         </StackPanel>
 
         <!--  Phần 2: Grid 2 cột cho ProgressBar và ProgressCircle  -->
@@ -104,11 +114,7 @@
                             Height="20"
                             Background="#1917171A"
                             IsIndeterminate="False"
-                            Value="50">
-                            <OneUI2:ProgressBar.Foreground>
-                                <brushes:ConicGradientBrush />
-                            </OneUI2:ProgressBar.Foreground>
-                        </OneUI2:ProgressBar>
+                            Value="50" />
                         <Slider
                             Width="220"
                             VerticalAlignment="Center"
@@ -144,11 +150,7 @@
                         Height="20"
                         Background="#1917171A"
                         IsIndeterminate="True"
-                        Value="100">
-                        <OneUI2:ProgressBar.Foreground>
-                            <brushes:ConicGradientBrush />
-                        </OneUI2:ProgressBar.Foreground>
-                    </OneUI2:ProgressBar>
+                        Value="100" />
                 </StackPanel>
             </StackPanel>
 

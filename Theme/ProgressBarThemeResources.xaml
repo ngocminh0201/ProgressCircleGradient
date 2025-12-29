@@ -46,7 +46,7 @@
         x:Key="OneUICustomProgressBarIndeterminateStyle"
         BasedOn="{StaticResource OneUIProgressBarIndeterminateStyle}"
         TargetType="OneUI:ProgressBar">
-        <Setter Property="Foreground" Value="{ThemeResource OneUIProgressBarForeground}" />
+        <Setter Property="Foreground" Value="{ThemeResource OneUIProgressBarDeterminateForeground}" />
         <Setter Property="Background" Value="{ThemeResource OneUIProgressBarBackground}" />
     </Style>
 
@@ -54,12 +54,12 @@
         x:Key="OneUICustomProgressBarDeterminateStyle"
         BasedOn="{StaticResource OneUIProgressBarDeterminateStyle}"
         TargetType="OneUI:ProgressBar">
-        <Setter Property="Foreground" Value="{ThemeResource OneUIProgressBarForeground}" />
+        <Setter Property="Foreground" Value="{ThemeResource OneUIProgressBarDeterminateForeground}" />
         <Setter Property="Background" Value="{ThemeResource OneUIProgressBarBackground}" />
     </Style>
 
     <Style x:Key="OneUIProgressBarIndeterminateStyle" TargetType="OneUI:ProgressBar">
-        <Setter Property="Foreground" Value="{ThemeResource OneUIProgressBarForeground}" />
+        <Setter Property="Foreground" Value="{ThemeResource OneUIProgressBarDeterminateForeground}" />
         <Setter Property="Background" Value="{ThemeResource OneUIProgressBarBackground}" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Template">
