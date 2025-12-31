@@ -22,7 +22,7 @@
         Orientation="Vertical"
         Spacing="28">
 
-        <!--  Phần 1: Border với ConicGradientBrush  -->
+        <!--  Phần 1: Border với AngularGradientBrush  -->
         <StackPanel
             Margin="0,0,0,10"
             HorizontalAlignment="Center"
@@ -32,7 +32,7 @@
                 HorizontalAlignment="Center"
                 FontSize="20"
                 FontWeight="Bold"
-                Text="ConicGradientBrush" />
+                Text="AngularGradientBrush" />
             <StackPanel
                 HorizontalAlignment="Center"
                 Orientation="Horizontal"
@@ -44,7 +44,7 @@
                     VerticalAlignment="Center"
                     CornerRadius="14">
                     <Border.Background>
-                        <brushes:ConicGradientBrush />
+                        <brushes:AngularGradientBrush />
                     </Border.Background>
                 </Border>
                 <Image
@@ -98,18 +98,18 @@
                     </StackPanel>
                 </StackPanel>
 
-                <!--  ProgressBar Determinate với ConicGradientBrush  -->
+                <!--  ProgressBar Determinate với LinearGradientBrush  -->
                 <StackPanel Orientation="Vertical" Spacing="10">
                     <TextBlock
                         FontSize="15"
                         FontWeight="Bold"
-                        Text="ProgressBar Determinate + ConicGradient" />
+                        Text="ProgressBar Determinate + LinearGradient" />
                     <StackPanel
                         VerticalAlignment="Center"
                         Orientation="Horizontal"
                         Spacing="16">
                         <OneUI2:ProgressBar
-                            x:Name="pbDeterminateConic"
+                            x:Name="pbDeterminateLinear"
                             Width="360"
                             Height="20"
                             Background="#1917171A"
@@ -120,7 +120,7 @@
                             VerticalAlignment="Center"
                             Maximum="100"
                             Minimum="1"
-                            Value="{Binding Value, ElementName=pbDeterminateConic, Mode=TwoWay}" />
+                            Value="{Binding Value, ElementName=pbDeterminateLinear, Mode=TwoWay}" />
                     </StackPanel>
                 </StackPanel>
 
@@ -139,12 +139,12 @@
                         Value="100" />
                 </StackPanel>
 
-                <!--  ProgressBar Indeterminate với ConicGradientBrush  -->
+                <!--  ProgressBar Indeterminate với LinearGradientBrush  -->
                 <StackPanel Orientation="Vertical" Spacing="10">
                     <TextBlock
                         FontSize="15"
                         FontWeight="Bold"
-                        Text="ProgressBar Indeterminate + ConicGradient" />
+                        Text="ProgressBar Indeterminate + LinearGradient" />
                     <OneUI2:ProgressBar
                         Width="360"
                         Height="20"
@@ -196,24 +196,24 @@
                     </StackPanel>
                 </StackPanel>
 
-                <!--  ProgressCircle Determinate với ConicGradientBrush  -->
+                <!--  ProgressCircle Determinate với AngularGradientBrush  -->
                 <StackPanel Orientation="Vertical" Spacing="10">
                     <TextBlock
                         FontSize="15"
                         FontWeight="Bold"
-                        Text="ProgressCircle Determinate + ConicGradient" />
+                        Text="ProgressCircle Determinate + AngularGradient" />
                     <StackPanel
                         VerticalAlignment="Center"
                         Orientation="Horizontal"
                         Spacing="16">
                         <OneUI:ProgressCircleDeterminate
-                            x:Name="pcDeterminateConic"
+                            x:Name="pcDeterminateAngular"
                             Background="#1919171A"
                             Size="Large"
                             Type="Determinate1"
                             Value="50">
                             <OneUI:ProgressCircleDeterminate.Foreground>
-                                <brushes:ConicGradientBrush />
+                                <brushes:AngularGradientBrush />
                             </OneUI:ProgressCircleDeterminate.Foreground>
                         </OneUI:ProgressCircleDeterminate>
                         <Slider
@@ -221,7 +221,7 @@
                             VerticalAlignment="Center"
                             Maximum="100"
                             Minimum="1"
-                            Value="{Binding Value, ElementName=pcDeterminateConic, Mode=TwoWay}" />
+                            Value="{Binding Value, ElementName=pcDeterminateAngular, Mode=TwoWay}" />
                     </StackPanel>
                 </StackPanel>
 
@@ -237,15 +237,15 @@
                         Size="Large" />
                 </StackPanel>
 
-                <!--  ProgressCircle Indeterminate với ConicGradientBrush  -->
+                <!--  ProgressCircle Indeterminate với AngularGradientBrush  -->
                 <StackPanel Orientation="Vertical" Spacing="10">
                     <TextBlock
                         FontSize="15"
                         FontWeight="Bold"
-                        Text="ProgressCircle Indeterminate + ConicGradient" />
+                        Text="ProgressCircle Indeterminate + AngularGradient" />
                     <OneUI:ProgressCircleIndeterminate Size="Large">
                         <OneUI:ProgressCircleIndeterminate.Foreground>
-                            <brushes:ConicGradientBrush />
+                            <brushes:AngularGradientBrush />
                         </OneUI:ProgressCircleIndeterminate.Foreground>
                     </OneUI:ProgressCircleIndeterminate>
                 </StackPanel>

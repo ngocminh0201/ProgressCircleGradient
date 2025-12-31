@@ -10,9 +10,9 @@ using Windows.UI;
 
 namespace ProgressCircleGradient.Brushes
 {
-    public sealed partial class ConicGradientBrush : XamlCompositionBrushBase
+    public sealed partial class AngularGradientBrush : XamlCompositionBrushBase
     {
-        private const int FixedResolution = 2048;
+        private const int FixedResolution = 1024;
         private const float InitialAngleOffset = -46.2f;
 
         private Compositor? _compositor;
@@ -20,19 +20,10 @@ namespace ProgressCircleGradient.Brushes
         private CompositionDrawingSurface? _surface;
         private CompositionSurfaceBrush? _surfaceBrush;
 
-        private readonly struct Stop
+        private readonly struct Stop(float angleDeg, byte a, byte r, byte g, byte b)
         {
-            public readonly float AngleDeg;
-            public readonly byte A, R, G, B;
-
-            public Stop(float angleDeg, byte a, byte r, byte g, byte b)
-            {
-                AngleDeg = angleDeg;
-                A = a;
-                R = r;
-                G = g;
-                B = b;
-            }
+            public readonly float AngleDeg = angleDeg;
+            public readonly byte A = a, R = r, G = g, B = b;
         }
 
         private static readonly Stop[] Stops =
@@ -91,7 +82,7 @@ namespace ProgressCircleGradient.Brushes
             if (_surface == null)
                 return;
 
-            var bytes = BuildConicGradientPixelsPremultipliedBGRA(FixedResolution, FixedResolution);
+            var bytes = BuildAngularGradientPixelsPremultipliedBGRA(FixedResolution, FixedResolution);
             var device = CanvasDevice.GetSharedDevice();
 
             using var bitmap = CanvasBitmap.CreateFromBytes(
@@ -102,14 +93,14 @@ namespace ProgressCircleGradient.Brushes
                 (Windows.Graphics.DirectX.DirectXPixelFormat)DirectXPixelFormat.B8G8R8A8UIntNormalized);
 
             using var ds = CanvasComposition.CreateDrawingSession(_surface);
-            ds.Clear(new Windows.UI.Color { A = 0, R = 0, G = 0, B = 0 });
+            ds.Clear(new Color { A = 0, R = 0, G = 0, B = 0 });
             ds.DrawImage(bitmap);
         }
 
         /// <summary>
-        /// Sample the conic gradient color at a specific point in the coordinate space.
+        /// Sample the Angular gradient color at a specific point in the coordinate space.
         /// </summary>
-        public static Color SampleColorAtPoint(Windows.Foundation.Point point, double centerX, double centerY)
+        public static Color SampleColorAtPoint(Point point, double centerX, double centerY)
         {
             float px = (float)(point.X - centerX);
             float py = (float)(point.Y - centerY);
@@ -136,7 +127,7 @@ namespace ProgressCircleGradient.Brushes
             return Color.FromArgb(a, r, g, b);
         }
 
-        private static byte[] BuildConicGradientPixelsPremultipliedBGRA(int width, int height)
+        private static byte[] BuildAngularGradientPixelsPremultipliedBGRA(int width, int height)
         {
             var buffer = new byte[width * height * 4];
 

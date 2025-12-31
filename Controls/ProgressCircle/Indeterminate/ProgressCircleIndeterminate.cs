@@ -55,7 +55,7 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
         private long _visibilityPropertyRegisterToken;
 
         private int _dotBrushUpdateGeneration;
-        private bool _isUsingFrozenConicColors;
+        private bool _isUsingFrozenAngularColors;
 
         private readonly List<ProgressCircleIndeterminateModel> _progressCircleIndeterminateModels = new()
         {
@@ -203,7 +203,7 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
 
         private void ThemeSettings_Changed(ThemeSettings sender, object args)
         {
-            if (_isUsingFrozenConicColors)
+            if (_isUsingFrozenAngularColors)
                 return;
 
             ApplyNormalDotBrushes();
@@ -352,13 +352,13 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
                 ResetAnimationToInitialFrame();
             }
 
-            if (TryApplyFrozenConicColors())
+            if (TryApplyFrozenAngularColors())
             {
-                _isUsingFrozenConicColors = true;
+                _isUsingFrozenAngularColors = true;
             }
             else
             {
-                _isUsingFrozenConicColors = false;
+                _isUsingFrozenAngularColors = false;
                 ApplyNormalDotBrushes();
             }
 
@@ -368,18 +368,18 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
             }
         }
 
-        private ConicGradientBrush? GetConicBrushSourceOrNull()
+        private AngularGradientBrush? GetAngularBrushSourceOrNull()
         {
-            if (PointForeground is ConicGradientBrush c1)
+            if (PointForeground is AngularGradientBrush c1)
                 return c1;
-            if (Foreground is ConicGradientBrush c2)
+            if (Foreground is AngularGradientBrush c2)
                 return c2;
             return null;
         }
 
-        private bool TryApplyFrozenConicColors()
+        private bool TryApplyFrozenAngularColors()
         {
-            if (GetConicBrushSourceOrNull() == null)
+            if (GetAngularBrushSourceOrNull() == null)
                 return false;
 
             double w = (_rootGrid != null && _rootGrid.ActualWidth > 0) ? _rootGrid.ActualWidth : (_rootGrid?.Width ?? 0);
@@ -410,10 +410,10 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
             var bottom = new Windows.Foundation.Point(cx, h - m - d * 0.5);
             var left = new Windows.Foundation.Point(m + d * 0.5, cy);
 
-            Color cTop = ConicGradientBrush.SampleColorAtPoint(top, cx, cy);
-            Color cRight = ConicGradientBrush.SampleColorAtPoint(right, cx, cy);
-            Color cBottom = ConicGradientBrush.SampleColorAtPoint(bottom, cx, cy);
-            Color cLeft = ConicGradientBrush.SampleColorAtPoint(left, cx, cy);
+            Color cTop = AngularGradientBrush.SampleColorAtPoint(top, cx, cy);
+            Color cRight = AngularGradientBrush.SampleColorAtPoint(right, cx, cy);
+            Color cBottom = AngularGradientBrush.SampleColorAtPoint(bottom, cx, cy);
+            Color cLeft = AngularGradientBrush.SampleColorAtPoint(left, cx, cy);
 
             _ellipse01.Fill = new SolidColorBrush(cTop);
             _ellipsePoint.Fill = new SolidColorBrush(cRight);
