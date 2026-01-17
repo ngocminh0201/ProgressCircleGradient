@@ -20,7 +20,7 @@ namespace ProgressCircleGradient.Brushes
         private const float InitialAngleOffset = -46.2f;
 
         // Thời gian để quay 1 vòng (giây). Bạn chỉnh số này nếu muốn nhanh/chậm hơn.
-        private const float SpinDurationSeconds = 3.5f;
+        private const float SpinDurationSeconds = 1.7f;
 
         // FPS redraw (30fps là đủ mượt với tốc độ quay này)
         private static readonly TimeSpan TickInterval = TimeSpan.FromMilliseconds(33);
