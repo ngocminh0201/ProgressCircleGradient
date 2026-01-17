@@ -72,59 +72,118 @@ namespace ProgressCircleGradient.Controls.ProgressBar
             RegisterPropertyChangedCallback(VisibilityProperty, OnVisibilityPropertyChanged);
 
             AssignInternalEvents();
-            SizeChanged += ProgressBar_SizeChanged;
         }
+
+        private Grid? _indeterminateClipHost;
+        private TranslateTransform? _indeterminateTranslateTransform;
+        private Rectangle? _indeterminateActiveRect;
 
         private void SetAnimation()
         {
             _indeterminateAnimation = GetTemplateChild(PART_ANIMATION) as Storyboard;
-            if (IsIndeterminate && _indeterminateAnimation != null)
+
+            // Indeterminate template parts (WinUI 3 - no OpacityMask/ClipToBounds)
+            _indeterminateClipHost = GetTemplateChild("IndeterminateClipHost") as Grid;
+            _indeterminateTranslateTransform = GetTemplateChild("IndeterminateTranslateTransform") as TranslateTransform;
+            _indeterminateActiveRect = GetTemplateChild("IndeterminateActiveRect") as Rectangle;
+
+            if (_indeterminateClipHost != null)
             {
-                _indeterminateAnimation.Stop();
-
-                var doubleAnimationB1 = _indeterminateAnimation.Children[0] as DoubleAnimationUsingKeyFrames;
-                doubleAnimationB1?.KeyFrames.Clear();
-                var B1InitialkeyFrame = CreateSplineDoubleKeyFrame(0, -1.448);
-                var B1FinalKeyFrame = CreateSplineDoubleKeyFrame(1.280, 1.096);
-                doubleAnimationB1?.KeyFrames.Add(B1InitialkeyFrame);
-                doubleAnimationB1?.KeyFrames.Add(B1FinalKeyFrame);
-
-                var doubleAnimationB2 = _indeterminateAnimation.Children[1] as DoubleAnimationUsingKeyFrames;
-                doubleAnimationB2?.KeyFrames.Clear();
-                var B2InitialkeyFrame = CreateSplineDoubleKeyFrame(0.350, -0.537);
-                var B2FinalKeyFrame = CreateSplineDoubleKeyFrame(1.550, 1.048);
-                doubleAnimationB2?.KeyFrames.Add(B2InitialkeyFrame);
-                doubleAnimationB2?.KeyFrames.Add(B2FinalKeyFrame);
-
-                var doubleAnimationB3 = _indeterminateAnimation.Children[2] as DoubleAnimationUsingKeyFrames;
-                doubleAnimationB3?.KeyFrames.Clear();
-                var B3InitialkeyFrame = CreateSplineDoubleKeyFrame(0.500, -0.281);
-                var B3FinalKeyFrame = CreateSplineDoubleKeyFrame(1.750, 1.015);
-                doubleAnimationB3?.KeyFrames.Add(B3InitialkeyFrame);
-                doubleAnimationB3?.KeyFrames.Add(B3FinalKeyFrame);
-
-                var doubleAnimationB4 = _indeterminateAnimation.Children[3] as DoubleAnimationUsingKeyFrames;
-                doubleAnimationB4?.KeyFrames.Clear();
-                var B4InitialkeyFrame = CreateSplineDoubleKeyFrame(0.666, -0.015);
-                var B4FinalKeyFrame = CreateSplineDoubleKeyFrame(1.916, 1.015);
-                doubleAnimationB4?.KeyFrames.Add(B4InitialkeyFrame);
-                doubleAnimationB4?.KeyFrames.Add(B4FinalKeyFrame);
-
-                _indeterminateAnimation.Begin();
-                _indeterminateAnimation.Completed += IndeterminateAnimation_Completed;
-                _indeterminateAnimation.RepeatBehavior = new RepeatBehavior(1);
+                _indeterminateClipHost.SizeChanged -= IndeterminateClipHost_SizeChanged;
+                _indeterminateClipHost.SizeChanged += IndeterminateClipHost_SizeChanged;
             }
+
+            UpdateIndeterminateAnimation();
         }
 
-        private SplineDoubleKeyFrame CreateSplineDoubleKeyFrame(double initialTime, double value)
+        private void IndeterminateClipHost_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            UpdateIndeterminateAnimation();
+        }
+
+        private void UpdateIndeterminateAnimation()
+        {
+            if (!IsIndeterminate)
+            {
+                _indeterminateAnimation?.Stop();
+                return;
+            }
+
+            if (_indeterminateAnimation == null ||
+                _indeterminateClipHost == null ||
+                _indeterminateTranslateTransform == null ||
+                _indeterminateActiveRect == null)
+            {
+                return;
+            }
+
+            double w = ActualWidth;
+            double h = _indeterminateClipHost.ActualHeight;
+
+            if (w <= 0 || h <= 0)
+            {
+                return;
+            }
+
+            // Active rect width equals track width (w). It moves from -w -> +w.
+            _indeterminateActiveRect.Width = w;
+
+            // Clip to bounds (replacement for ClipToBounds)
+            _indeterminateClipHost.Clip = new RectangleGeometry()
+            {
+                Rect = new Windows.Foundation.Rect(0, 0, w, h)
+            };
+
+            // Reset start position
+            _indeterminateTranslateTransform.X = -w;
+
+            // IMPORTANT: stop storyboard BEFORE mutating keyframes (WinUI throws if active)
+            _indeterminateAnimation.Stop();
+
+            if (_indeterminateAnimation.Children.Count > 0 &&
+                _indeterminateAnimation.Children[0] is DoubleAnimationUsingKeyFrames translateAnim)
+            {
+                // Prefer updating existing keyframes instead of clearing (safer & less churn)
+                if (translateAnim.KeyFrames.Count >= 2 &&
+                    translateAnim.KeyFrames[0] is SplineDoubleKeyFrame k0 &&
+                    translateAnim.KeyFrames[1] is SplineDoubleKeyFrame k1)
+                {
+                    k0.KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(0.0));
+                    k0.Value = -w;
+                    k0.KeySpline = new KeySpline()
+                    {
+                        ControlPoint1 = new Windows.Foundation.Point(0.54, 0),
+                        ControlPoint2 = new Windows.Foundation.Point(0.38, 1)
+                    };
+
+                    k1.KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(1.2));
+                    k1.Value = +w;
+                    k1.KeySpline = new KeySpline()
+                    {
+                        ControlPoint1 = new Windows.Foundation.Point(0.54, 0),
+                        ControlPoint2 = new Windows.Foundation.Point(0.38, 1)
+                    };
+                }
+                else
+                {
+                    translateAnim.KeyFrames.Clear();
+                    translateAnim.KeyFrames.Add(CreateSplineDoubleKeyFrame(0.0, -w));
+                    translateAnim.KeyFrames.Add(CreateSplineDoubleKeyFrame(1.2, +w));
+                }
+            }
+
+            _indeterminateAnimation.Begin();
+        }
+
+        private SplineDoubleKeyFrame CreateSplineDoubleKeyFrame(double timeSeconds, double value)
         {
             var keyFrame = new SplineDoubleKeyFrame();
-            keyFrame.KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(initialTime));
-            keyFrame.Value = ActualWidth * value;
+            keyFrame.KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(timeSeconds));
+            keyFrame.Value = value;
             keyFrame.KeySpline = new KeySpline()
             {
-                ControlPoint1 = new Windows.Foundation.Point(0.33, 0),
-                ControlPoint2 = new Windows.Foundation.Point(0.2, 1)
+                ControlPoint1 = new Windows.Foundation.Point(0.54, 0),
+                ControlPoint2 = new Windows.Foundation.Point(0.38, 1)
             };
             return keyFrame;
         }
