@@ -26,14 +26,15 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
         private const string PART_ELLIPSE02 = "PART_Ellipse02";
         private const string PART_ELLIPSE03 = "PART_Ellipse03";
 
+        // Defaults (used when user didn't set Foreground/PointForeground)
         private const string ELLIPSE_INDETERMINATE_KEY = "#387AFF";
-        private const string VARIANT_ELLIPSE_INDETERMINATE_KEY = "3DCC87";
+        private const string VARIANT_ELLIPSE_INDETERMINATE_KEY = "#3DCC87";
 
-        private const double ELLIPSE_BASE_SIZE = 4.5;
-        private const double ELLIPE_BASE_MIN_OFFSET = 1.5;
-        private const double ELLIPE_BASE_MAX_OFFSET = 6.5;
-        private const double ELLIPE_BASE_DISPLACEMENT = 5;
-        private const double ELLIPE_BASE_DISPLACEMENT_REVERSE = -4;
+        // VI reference (PDF uses LG: component 60x60, dot 14x14, distances 20dp & 11dp from center)
+        private const double VI_LG_GRID_SIZE = 60.0;
+        private const double VI_LG_DOT_SIZE = 14.0;
+        private const double VI_LG_OUTER_DISTANCE = 20.0;
+        private const double VI_LG_INNER_DISTANCE = 11.0;
 
         private const int GRIDSIZE_XL = 90;
         private const int GRIDSIZE_LG = 60;
@@ -67,7 +68,7 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
         };
         #endregion
 
-        #region Depedency Properties
+        #region Dependency Properties
         public new Brush Foreground
         {
             get => (Brush)GetValue(ForegroundProperty);
@@ -97,24 +98,11 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
         internal static readonly DependencyProperty EllipseDiameterProperty =
             DependencyProperty.Register(nameof(EllipseDiameter), typeof(double), typeof(ProgressCircleIndeterminate), new PropertyMetadata(default(double)));
 
-        internal double EllipseDisplacementPosition
-        {
-            get => (double)GetValue(EllipseDisplacementPositionProperty);
-            set => SetValue(EllipseDisplacementPositionProperty, value);
-        }
-
-        internal static readonly DependencyProperty EllipseDisplacementPositionProperty =
-            DependencyProperty.Register(nameof(EllipseDisplacementPosition), typeof(double), typeof(ProgressCircleIndeterminate), new PropertyMetadata(default(double)));
-
-        internal double EllipseNegativeDisplacement
-        {
-            get => (double)GetValue(EllipseNegativeDisplacementProperty);
-            set => SetValue(EllipseNegativeDisplacementProperty, value);
-        }
-
-        internal static readonly DependencyProperty EllipseNegativeDisplacementProperty =
-            DependencyProperty.Register(nameof(EllipseNegativeDisplacement), typeof(double), typeof(ProgressCircleIndeterminate), new PropertyMetadata(default(double)));
-
+        // Re-purposed for VI distances:
+        //  - EllipseMaxOffset  : outer distance (20dp @ LG)
+        //  - EllipseMinOffset  : inner distance (11dp @ LG)
+        //  - EllipseNegativeDisplacement : -outer
+        //  - EllipseNegativeMinOffset    : -inner
         internal double EllipseMinOffset
         {
             get => (double)GetValue(EllipseMinOffsetProperty);
@@ -132,6 +120,34 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
 
         internal static readonly DependencyProperty EllipseMaxOffsetProperty =
             DependencyProperty.Register(nameof(EllipseMaxOffset), typeof(double), typeof(ProgressCircleIndeterminate), new PropertyMetadata(default(double)));
+
+        internal double EllipseNegativeDisplacement
+        {
+            get => (double)GetValue(EllipseNegativeDisplacementProperty);
+            set => SetValue(EllipseNegativeDisplacementProperty, value);
+        }
+
+        internal static readonly DependencyProperty EllipseNegativeDisplacementProperty =
+            DependencyProperty.Register(nameof(EllipseNegativeDisplacement), typeof(double), typeof(ProgressCircleIndeterminate), new PropertyMetadata(default(double)));
+
+        internal double EllipseNegativeMinOffset
+        {
+            get => (double)GetValue(EllipseNegativeMinOffsetProperty);
+            set => SetValue(EllipseNegativeMinOffsetProperty, value);
+        }
+
+        internal static readonly DependencyProperty EllipseNegativeMinOffsetProperty =
+            DependencyProperty.Register(nameof(EllipseNegativeMinOffset), typeof(double), typeof(ProgressCircleIndeterminate), new PropertyMetadata(default(double)));
+
+        // Keep these for backward-compat (not used by new template, but keeping to avoid breaking external bindings)
+        internal double EllipseDisplacementPosition
+        {
+            get => (double)GetValue(EllipseDisplacementPositionProperty);
+            set => SetValue(EllipseDisplacementPositionProperty, value);
+        }
+
+        internal static readonly DependencyProperty EllipseDisplacementPositionProperty =
+            DependencyProperty.Register(nameof(EllipseDisplacementPosition), typeof(double), typeof(ProgressCircleIndeterminate), new PropertyMetadata(default(double)));
         #endregion
 
         #region Constructors
@@ -252,11 +268,19 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
 
             SetTextAlignment(progressDefinition.Orientation);
 
-            EllipseDiameter = ELLIPSE_BASE_SIZE * progressDefinition.Scale;
-            EllipseMinOffset = ELLIPE_BASE_MIN_OFFSET * progressDefinition.Scale;
-            EllipseMaxOffset = ELLIPE_BASE_MAX_OFFSET * progressDefinition.Scale;
-            EllipseDisplacementPosition = ELLIPE_BASE_DISPLACEMENT * progressDefinition.Scale;
-            EllipseNegativeDisplacement = ELLIPE_BASE_DISPLACEMENT_REVERSE * progressDefinition.Scale;
+            // Scale factor uses LG as baseline (60x60).
+            double scaleFactor = progressDefinition.GridSize / VI_LG_GRID_SIZE;
+
+            EllipseDiameter = VI_LG_DOT_SIZE * scaleFactor;
+
+            EllipseMaxOffset = VI_LG_OUTER_DISTANCE * scaleFactor;   // 20dp @ LG
+            EllipseMinOffset = VI_LG_INNER_DISTANCE * scaleFactor;   // 11dp @ LG
+
+            EllipseNegativeDisplacement = -EllipseMaxOffset;         // -outer
+            EllipseNegativeMinOffset = -EllipseMinOffset;            // -inner
+
+            // Keep old props consistent (not used by new template)
+            EllipseDisplacementPosition = EllipseMaxOffset;
         }
 
         private void SetTextAlignment(ProgressCircleIndeterminateOrientation orientation)
@@ -312,31 +336,46 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
 
         private void ResetAnimationToInitialFrame()
         {
-            if (_rootGrid?.RenderTransform is RotateTransform rt)
+            // Reset transforms for root (Scale + Rotate)
+            if (_rootGrid?.RenderTransform is TransformGroup tg)
             {
-                rt.Angle = 0;
+                foreach (var t in tg.Children)
+                {
+                    if (t is RotateTransform rt) rt.Angle = 0;
+                    if (t is ScaleTransform st) { st.ScaleX = 1; st.ScaleY = 1; }
+                }
+            }
+            else if (_rootGrid?.RenderTransform is RotateTransform rtOnly)
+            {
+                rtOnly.Angle = 0;
             }
 
+            // Reset dot transforms to "outer" positions (20dp @ LG, scaled).
             if (_ellipse01?.RenderTransform is TranslateTransform t1)
             {
                 t1.X = 0;
-                t1.Y = 0;
+                t1.Y = EllipseNegativeDisplacement; // top = -outer
             }
             if (_ellipsePoint?.RenderTransform is TranslateTransform t2)
             {
-                t2.X = 0;
+                t2.X = EllipseMaxOffset; // right = +outer
                 t2.Y = 0;
             }
             if (_ellipse02?.RenderTransform is TranslateTransform t3)
             {
                 t3.X = 0;
-                t3.Y = 0;
+                t3.Y = EllipseMaxOffset; // bottom = +outer
             }
             if (_ellipse03?.RenderTransform is TranslateTransform t4)
             {
-                t4.X = 0;
+                t4.X = EllipseNegativeDisplacement; // left = -outer
                 t4.Y = 0;
             }
+
+            if (_ellipse01 != null) _ellipse01.Opacity = 1;
+            if (_ellipsePoint != null) _ellipsePoint.Opacity = 1;
+            if (_ellipse02 != null) _ellipse02.Opacity = 1;
+            if (_ellipse03 != null) _ellipse03.Opacity = 1;
         }
 
         private void UpdateDotBrushesAndMaybeRestartAnimation(bool restartAnimation)
@@ -403,12 +442,13 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
             double cy = h * 0.5;
 
             double d = EllipseDiameter;
-            double m = EllipseMinOffset;
+            double outer = EllipseMaxOffset;
 
-            var top = new Windows.Foundation.Point(cx, m + d * 0.5);
-            var right = new Windows.Foundation.Point(w - m - d * 0.5, cy);
-            var bottom = new Windows.Foundation.Point(cx, h - m - d * 0.5);
-            var left = new Windows.Foundation.Point(m + d * 0.5, cy);
+            // Sample 4 points at "outer" positions
+            var top = new Windows.Foundation.Point(cx, cy - outer);
+            var right = new Windows.Foundation.Point(cx + outer, cy);
+            var bottom = new Windows.Foundation.Point(cx, cy + outer);
+            var left = new Windows.Foundation.Point(cx - outer, cy);
 
             Color cTop = AngularGradientBrush.SampleColorAtPoint(top, cx, cy);
             Color cRight = AngularGradientBrush.SampleColorAtPoint(right, cx, cy);
