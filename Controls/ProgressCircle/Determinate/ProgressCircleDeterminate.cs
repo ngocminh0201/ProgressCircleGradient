@@ -64,12 +64,12 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
 
         private readonly List<ProgressCircleDeterminateModel> _progressCircleDeterminateModels = new()
         {
-            new ProgressCircleDeterminateModel(){ Type = ProgressCircleDeterminateType.Determinate1, Size = ProgressCircleSize.XLarge, Orientation = ProgressCircleIndeterminateOrientation.Vertical, RadiusSize = 30, Thickness = 10, Margin = new Thickness(7) },
-            new ProgressCircleDeterminateModel(){ Type = ProgressCircleDeterminateType.Determinate1, Size = ProgressCircleSize.Large,  Orientation = ProgressCircleIndeterminateOrientation.Vertical, RadiusSize = 21, Thickness = 8,  Margin = new Thickness(5) },
-            new ProgressCircleDeterminateModel(){ Type = ProgressCircleDeterminateType.Determinate1, Size = ProgressCircleSize.Medium, Orientation = ProgressCircleIndeterminateOrientation.Vertical, RadiusSize = 17, Thickness = 6,  Margin = new Thickness(4) },
-            new ProgressCircleDeterminateModel(){ Type = ProgressCircleDeterminateType.Determinate1, Size = ProgressCircleSize.Small,  Orientation = ProgressCircleIndeterminateOrientation.Horizontal, RadiusSize = 8.5, Thickness = 3, Margin = new Thickness(2) },
-            new ProgressCircleDeterminateModel(){ Type = ProgressCircleDeterminateType.Determinate1, Size = ProgressCircleSize.SmallTitle, Orientation = ProgressCircleIndeterminateOrientation.Horizontal, RadiusSize = 7, Thickness = 2, Margin = new Thickness(1.6) },
-            new ProgressCircleDeterminateModel(){ Type = ProgressCircleDeterminateType.Determinate2, Size = ProgressCircleSize.SmallTitle, Orientation = ProgressCircleIndeterminateOrientation.Vertical, RadiusSize = 31, Thickness = 6, Margin = new Thickness(7) },
+            new ProgressCircleDeterminateModel(){ Type = ProgressCircleDeterminateType.Determinate1, Size = ProgressCircleSize.XLarge, Orientation = ProgressCircleIndeterminateOrientation.Vertical, RadiusSize = 27.5, Thickness = 15, Margin = new Thickness(7) },
+            new ProgressCircleDeterminateModel(){ Type = ProgressCircleDeterminateType.Determinate1, Size = ProgressCircleSize.Large,  Orientation = ProgressCircleIndeterminateOrientation.Vertical, RadiusSize = 19, Thickness = 12,  Margin = new Thickness(5) },
+            new ProgressCircleDeterminateModel(){ Type = ProgressCircleDeterminateType.Determinate1, Size = ProgressCircleSize.Medium, Orientation = ProgressCircleIndeterminateOrientation.Vertical, RadiusSize = 15.5, Thickness = 9,  Margin = new Thickness(4) },
+            new ProgressCircleDeterminateModel(){ Type = ProgressCircleDeterminateType.Determinate1, Size = ProgressCircleSize.Small,  Orientation = ProgressCircleIndeterminateOrientation.Horizontal, RadiusSize = 7.75, Thickness = 4.5, Margin = new Thickness(2) },
+            new ProgressCircleDeterminateModel(){ Type = ProgressCircleDeterminateType.Determinate1, Size = ProgressCircleSize.SmallTitle, Orientation = ProgressCircleIndeterminateOrientation.Horizontal, RadiusSize = 6.5, Thickness = 3, Margin = new Thickness(1.6) },
+            new ProgressCircleDeterminateModel(){ Type = ProgressCircleDeterminateType.Determinate2, Size = ProgressCircleSize.SmallTitle, Orientation = ProgressCircleIndeterminateOrientation.Vertical, RadiusSize = 29.5, Thickness = 9, Margin = new Thickness(7) },
         };
         #endregion
 
@@ -331,7 +331,7 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
             if (Value <= 0 || angle <= 0.001)
             {
                 _gradientLayer.Visibility = Visibility.Collapsed;
-                _clipPathGeometry.Path = null;
+                //_clipPathGeometry.Path = null;
                 _currentClipGeometry?.Dispose();
                 _currentClipGeometry = null;
                 return;

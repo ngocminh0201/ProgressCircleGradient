@@ -7,7 +7,7 @@
     xmlns:OneUI2="using:ProgressCircleGradient.Controls.ProgressBar"
     xmlns:brushes="using:ProgressCircleGradient.Brushes"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="using:ProgressCircleGradient"
+    xmlns:input="using:Microsoft.UI.Xaml.Input"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Title="ProgressCircleGradient"
     mc:Ignorable="d">
@@ -16,240 +16,281 @@
         <MicaBackdrop />
     </Window.SystemBackdrop>
 
-    <StackPanel
-        Padding="10"
-        VerticalAlignment="Top"
-        Orientation="Vertical"
-        Spacing="28">
+    <NavigationView
+        x:Name="NavView"
+        IsBackButtonVisible="Collapsed"
+        IsSettingsVisible="False"
+        Loaded="NavView_Loaded"
+        PaneDisplayMode="Left"
+        SelectionChanged="NavView_SelectionChanged">
 
-        <!--  Phần 1: Border với AngularGradientBrush  -->
-        <StackPanel
-            Margin="0,0,0,10"
-            HorizontalAlignment="Center"
-            Orientation="Vertical"
-            Spacing="10">
-            <TextBlock
-                HorizontalAlignment="Center"
-                FontSize="20"
-                FontWeight="Bold"
-                Text="AngularGradientBrush" />
-            <StackPanel
-                HorizontalAlignment="Center"
-                Orientation="Horizontal"
-                Spacing="20">
-                <Border
-                    Width="160"
-                    Height="160"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    CornerRadius="14">
-                    <Border.Background>
-                        <brushes:AngularGradientBrush />
-                    </Border.Background>
-                </Border>
-                <Image
-                    Width="160"
-                    Height="160"
-                    Source="/Brushes/Rectangle 1297.png" />
-            </StackPanel>
+        <NavigationView.MenuItems>
+            <!--  1. AngularGradientBrush  -->
+            <NavigationViewItem Content="AngularGradientBrush" SelectsOnInvoked="False">
+                <NavigationViewItem.MenuItems>
+                    <NavigationViewItem
+                        x:Name="NavItem_AngularBorder"
+                        Content="Border with AngularGradientBrush"
+                        Tag="AngularBorder" />
+                    <NavigationViewItem
+                        x:Name="NavItem_AngularImage"
+                        Content="Image gốc"
+                        Tag="AngularImage" />
+                </NavigationViewItem.MenuItems>
+            </NavigationViewItem>
 
-        </StackPanel>
+            <!--  2. ProgressBar  -->
+            <NavigationViewItem Content="ProgressBar" SelectsOnInvoked="False">
+                <NavigationViewItem.MenuItems>
+                    <NavigationViewItem
+                        x:Name="NavItem_PbDeterminate"
+                        Content="Determinate"
+                        Tag="ProgressBarDeterminate" />
+                    <NavigationViewItem
+                        x:Name="NavItem_PbIndeterminate"
+                        Content="Indeterminate"
+                        Tag="ProgressBarIndeterminate" />
+                </NavigationViewItem.MenuItems>
+            </NavigationViewItem>
 
-        <!--  Phần 2: Grid 2 cột cho ProgressBar và ProgressCircle  -->
-        <Grid Margin="0,10,0,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="24" />
-                <!--  separator column  -->
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
+            <!--  3. ProgressCircle  -->
+            <NavigationViewItem Content="ProgressCircle" SelectsOnInvoked="False">
+                <NavigationViewItem.MenuItems>
+                    <NavigationViewItem
+                        x:Name="NavItem_PcDeterminate"
+                        Content="Determinate"
+                        Tag="ProgressCircleDeterminate" />
+                    <NavigationViewItem
+                        x:Name="NavItem_PcIndeterminate"
+                        Content="Indeterminate"
+                        Tag="ProgressCircleIndeterminate" />
+                </NavigationViewItem.MenuItems>
+            </NavigationViewItem>
+        </NavigationView.MenuItems>
 
-            <!--  Cột 1: ProgressBar  -->
-            <StackPanel
-                Grid.Column="0"
-                Margin="0,0,20,0"
-                HorizontalAlignment="Center"
-                Orientation="Vertical"
-                Spacing="32">
-                <!--  ProgressBar Determinate bình thường  -->
-                <StackPanel Orientation="Vertical" Spacing="10">
-                    <TextBlock
-                        FontSize="15"
-                        FontWeight="Bold"
-                        Text="ProgressBar Determinate" />
+        <NavigationView.Content>
+            <ScrollViewer Padding="16" VerticalScrollBarVisibility="Auto">
+                <Grid>
+                    <!--  AngularGradientBrush / Border  -->
                     <StackPanel
+                        x:Name="Page_AngularBorder"
+                        HorizontalAlignment="Center"
                         VerticalAlignment="Center"
-                        Orientation="Horizontal"
-                        Spacing="16">
-                        <OneUI2:ProgressBar
-                            x:Name="pbDeterminate"
-                            Width="360"
-                            Height="20"
-                            Background="#1917171A"
-                            Foreground="#387AFF"
-                            IsIndeterminate="False"
-                            Value="50" />
-                        <Slider
-                            Width="220"
+                        Spacing="12"
+                        Visibility="Collapsed">
+
+                        <Border
+                            Width="160"
+                            Height="160"
+                            HorizontalAlignment="Center"
                             VerticalAlignment="Center"
-                            Maximum="100"
-                            Minimum="1"
-                            Value="{Binding Value, ElementName=pbDeterminate, Mode=TwoWay}" />
-                    </StackPanel>
-                </StackPanel>
-
-                <!--  ProgressBar Determinate với LinearGradientBrush  -->
-                <StackPanel Orientation="Vertical" Spacing="10">
-                    <TextBlock
-                        FontSize="15"
-                        FontWeight="Bold"
-                        Text="ProgressBar Determinate + LinearGradient" />
-                    <StackPanel
-                        VerticalAlignment="Center"
-                        Orientation="Horizontal"
-                        Spacing="16">
-                        <OneUI2:ProgressBar
-                            x:Name="pbDeterminateLinear"
-                            Width="360"
-                            Height="20"
-                            Background="#1917171A"
-                            IsIndeterminate="False"
-                            Value="50" />
-                        <Slider
-                            Width="220"
-                            VerticalAlignment="Center"
-                            Maximum="100"
-                            Minimum="1"
-                            Value="{Binding Value, ElementName=pbDeterminateLinear, Mode=TwoWay}" />
-                    </StackPanel>
-                </StackPanel>
-
-                <!--  ProgressBar Indeterminate bình thường  -->
-                <StackPanel Orientation="Vertical" Spacing="10">
-                    <TextBlock
-                        FontSize="15"
-                        FontWeight="Bold"
-                        Text="ProgressBar Indeterminate" />
-                    <OneUI2:ProgressBar
-                        Width="360"
-                        Height="20"
-                        Background="#1917171A"
-                        Foreground="#387AFF"
-                        IsIndeterminate="True"
-                        Value="100" />
-                </StackPanel>
-
-                <!--  ProgressBar Indeterminate với LinearGradientBrush  -->
-                <StackPanel Orientation="Vertical" Spacing="10">
-                    <TextBlock
-                        FontSize="15"
-                        FontWeight="Bold"
-                        Text="ProgressBar Indeterminate + LinearGradient" />
-                    <OneUI2:ProgressBar
-                        Width="360"
-                        Height="20"
-                        Background="#1917171A"
-                        IsIndeterminate="True"
-                        Value="100" />
-                </StackPanel>
-            </StackPanel>
-
-            <!--  Separator  -->
-            <Border
-                Grid.Column="1"
-                Width="2"
-                Margin="0,8"
-                VerticalAlignment="Stretch"
-                Background="#2E2E2E"
-                CornerRadius="1" />
-
-            <!--  Cột 2: ProgressCircle  -->
-            <StackPanel
-                Grid.Column="2"
-                Margin="20,0,0,0"
-                HorizontalAlignment="Center"
-                Orientation="Vertical"
-                Spacing="32">
-                <!--  ProgressCircle Determinate bình thường  -->
-                <StackPanel Orientation="Vertical" Spacing="10">
-                    <TextBlock
-                        FontSize="15"
-                        FontWeight="Bold"
-                        Text="ProgressCircle Determinate" />
-                    <StackPanel
-                        VerticalAlignment="Center"
-                        Orientation="Horizontal"
-                        Spacing="16">
-                        <OneUI:ProgressCircleDeterminate
-                            x:Name="pcDeterminate"
-                            Background="#1919171A"
-                            Foreground="#387AFF"
-                            Size="Large"
-                            Type="Determinate1"
-                            Value="50" />
-                        <Slider
-                            Width="220"
-                            VerticalAlignment="Center"
-                            Maximum="100"
-                            Minimum="1"
-                            Value="{Binding Value, ElementName=pcDeterminate, Mode=TwoWay}" />
-                    </StackPanel>
-                </StackPanel>
-
-                <!--  ProgressCircle Determinate với AngularGradientBrush  -->
-                <StackPanel Orientation="Vertical" Spacing="10">
-                    <TextBlock
-                        FontSize="15"
-                        FontWeight="Bold"
-                        Text="ProgressCircle Determinate + AngularGradient" />
-                    <StackPanel
-                        VerticalAlignment="Center"
-                        Orientation="Horizontal"
-                        Spacing="16">
-                        <OneUI:ProgressCircleDeterminate
-                            x:Name="pcDeterminateAngular"
-                            Background="#1919171A"
-                            Size="Large"
-                            Type="Determinate1"
-                            Value="50">
-                            <OneUI:ProgressCircleDeterminate.Foreground>
+                            CornerRadius="14">
+                            <Border.Background>
                                 <brushes:AngularGradientBrush />
-                            </OneUI:ProgressCircleDeterminate.Foreground>
-                        </OneUI:ProgressCircleDeterminate>
-                        <Slider
-                            Width="220"
-                            VerticalAlignment="Center"
-                            Maximum="100"
-                            Minimum="1"
-                            Value="{Binding Value, ElementName=pcDeterminateAngular, Mode=TwoWay}" />
+                            </Border.Background>
+                        </Border>
                     </StackPanel>
-                </StackPanel>
 
-                <!--  ProgressCircle Indeterminate bình thường  -->
-                <StackPanel Orientation="Vertical" Spacing="10">
-                    <TextBlock
-                        FontSize="15"
-                        FontWeight="Bold"
-                        Text="ProgressCircle Indeterminate" />
-                    <OneUI:ProgressCircleIndeterminate
-                        Foreground="#387AFF"
-                        PointForeground="#3DCC87"
-                        Size="Large" />
-                </StackPanel>
+                    <!--  AngularGradientBrush / Image  -->
+                    <StackPanel
+                        x:Name="Page_AngularImage"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Spacing="12"
+                        Visibility="Collapsed">
 
-                <!--  ProgressCircle Indeterminate với AngularGradientBrush  -->
-                <StackPanel Orientation="Vertical" Spacing="10">
-                    <TextBlock
-                        FontSize="15"
-                        FontWeight="Bold"
-                        Text="ProgressCircle Indeterminate + AngularGradient" />
-                    <OneUI:ProgressCircleIndeterminate Size="Large">
-                        <OneUI:ProgressCircleIndeterminate.Foreground>
-                            <brushes:AngularGradientBrush />
-                        </OneUI:ProgressCircleIndeterminate.Foreground>
-                    </OneUI:ProgressCircleIndeterminate>
-                </StackPanel>
-            </StackPanel>
-        </Grid>
-    </StackPanel>
+                        <Image
+                            Width="160"
+                            Height="160"
+                            Source="/Brushes/Rectangle 1297.png" />
+                    </StackPanel>
+
+                    <!--  ProgressBar / Determinate (LinearGradientBrush)  -->
+                    <StackPanel
+                        x:Name="Page_ProgressBarDeterminate"
+                        Margin="20"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Spacing="16"
+                        Visibility="Collapsed">
+
+
+                        <StackPanel
+                            VerticalAlignment="Center"
+                            Orientation="Vertical"
+                            Spacing="26">
+                            <OneUI2:ProgressBar
+                                x:Name="pbDeterminateLinear"
+                                Width="360"
+                                Height="20"
+                                Background="#1917171A"
+                                IsIndeterminate="False"
+                                Value="50" />
+
+                            <Slider
+                                Width="220"
+                                Margin="0,50,0,0"
+                                VerticalAlignment="Center"
+                                Maximum="100"
+                                Minimum="0"
+                                Value="{Binding Value, ElementName=pbDeterminateLinear, Mode=TwoWay}" />
+
+                            <StackPanel
+                                HorizontalAlignment="Center"
+                                Orientation="Horizontal"
+                                Spacing="6">
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    FontSize="12"
+                                    Text="Width" />
+                                <TextBox
+                                    x:Name="TbPbDeterminateWidth"
+                                    Width="90"
+                                    Text="360"
+                                    TextChanged="TbPbDeterminateWidth_TextChanged" />
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!--  ProgressBar / Indeterminate (LinearGradientBrush)  -->
+                    <StackPanel
+                        x:Name="Page_ProgressBarIndeterminate"
+                        Margin="30"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Spacing="16"
+                        Visibility="Collapsed">
+
+
+                        <StackPanel
+                            VerticalAlignment="Center"
+                            Orientation="Vertical"
+                            Spacing="26">
+                            <OneUI2:ProgressBar
+                                x:Name="pbIndeterminateLinear"
+                                Width="360"
+                                Height="20"
+                                Background="#1917171A"
+                                IsIndeterminate="True"
+                                Value="100" />
+
+                            <StackPanel
+                                HorizontalAlignment="Center"
+                                Orientation="Horizontal"
+                                Spacing="6">
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    FontSize="12"
+                                    Text="Width" />
+                                <TextBox
+                                    x:Name="TbPbIndeterminateWidth"
+                                    Width="90"
+                                    Text="360"
+                                    TextChanged="TbPbIndeterminateWidth_TextChanged">
+                                    <TextBox.InputScope>
+                                        <input:InputScope>
+                                            <input:InputScope.Names>
+                                                <input:InputScopeName NameValue="Number" />
+                                            </input:InputScope.Names>
+                                        </input:InputScope>
+                                    </TextBox.InputScope>
+                                </TextBox>
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!--  ProgressCircle / Determinate (AngularGradientBrush)  -->
+                    <StackPanel
+                        x:Name="Page_ProgressCircleDeterminate"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Spacing="16"
+                        Visibility="Collapsed">
+
+                        <StackPanel
+                            VerticalAlignment="Center"
+                            Orientation="Vertical"
+                            Spacing="26">
+                            <OneUI:ProgressCircleDeterminate
+                                x:Name="pcDeterminateAngular"
+                                Background="#1919171A"
+                                Size="Large"
+                                Type="Determinate1"
+                                Value="50">
+                                <OneUI:ProgressCircleDeterminate.Foreground>
+                                    <brushes:AngularGradientBrush />
+                                </OneUI:ProgressCircleDeterminate.Foreground>
+                            </OneUI:ProgressCircleDeterminate>
+
+                            <StackPanel HorizontalAlignment="Center" Spacing="12">
+                                <Slider
+                                    Width="220"
+                                    Margin="0,30,0,0"
+                                    VerticalAlignment="Center"
+                                    Maximum="100"
+                                    Minimum="0"
+                                    Value="{Binding Value, ElementName=pcDeterminateAngular, Mode=TwoWay}" />
+
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock VerticalAlignment="Center" Text="Size" />
+                                    <ComboBox
+                                        x:Name="CbPcDeterminateSize"
+                                        Width="160"
+                                        SelectedIndex="3"
+                                        SelectionChanged="CbPcDeterminateSize_SelectionChanged">
+                                        <ComboBoxItem Content="SmallTitle" />
+                                        <ComboBoxItem Content="Small" />
+                                        <ComboBoxItem Content="Medium" />
+                                        <ComboBoxItem Content="Large" />
+                                        <ComboBoxItem Content="XLarge" />
+                                    </ComboBox>
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!--  ProgressCircle / Indeterminate (AngularGradientBrush)  -->
+                    <StackPanel
+                        x:Name="Page_ProgressCircleIndeterminate"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Spacing="16"
+                        Visibility="Collapsed">
+
+
+                        <StackPanel
+                            VerticalAlignment="Center"
+                            Orientation="Horizontal"
+                            Spacing="16">
+                            <OneUI:ProgressCircleIndeterminate x:Name="pcIndeterminateAngular" Size="Large">
+                                <OneUI:ProgressCircleIndeterminate.Foreground>
+                                    <brushes:AngularGradientBrush />
+                                </OneUI:ProgressCircleIndeterminate.Foreground>
+                            </OneUI:ProgressCircleIndeterminate>
+
+                            <StackPanel
+                                Margin="100,0,0,0"
+                                HorizontalAlignment="Center"
+                                Orientation="Horizontal"
+                                Spacing="8">
+                                <TextBlock VerticalAlignment="Center" Text="Size" />
+                                <ComboBox
+                                    x:Name="CbPcIndeterminateSize"
+                                    Width="160"
+                                    VerticalAlignment="Center"
+                                    SelectedIndex="3"
+                                    SelectionChanged="CbPcIndeterminateSize_SelectionChanged">
+                                    <ComboBoxItem Content="SmallTitle" />
+                                    <ComboBoxItem Content="Small" />
+                                    <ComboBoxItem Content="Medium" />
+                                    <ComboBoxItem Content="Large" />
+                                    <ComboBoxItem Content="XLarge" />
+                                </ComboBox>
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </ScrollViewer>
+        </NavigationView.Content>
+    </NavigationView>
 </Window>

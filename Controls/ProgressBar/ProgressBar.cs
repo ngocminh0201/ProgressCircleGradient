@@ -25,7 +25,7 @@ namespace ProgressCircleGradient.Controls.ProgressBar
         private const string INDETERMINATE_STYLE = "OneUIProgressBarIndeterminateStyle";
 
         // Determinate drifting (match AngularGradientBrush speed: 1 cycle/1.7s)
-        private const double DeterminateDriftDurationSeconds = 3.6;
+        private const double DeterminateDriftDurationSeconds = 3.0;
         private static readonly TimeSpan DeterminateDriftTickInterval = TimeSpan.FromMilliseconds(16);
         private const double DeterminateDriftDirection = 1.0; // -1: drift left, +1: drift right
 
