@@ -25,7 +25,7 @@ namespace ProgressCircleGradient.Controls.ProgressBar
         private const string INDETERMINATE_STYLE = "OneUIProgressBarIndeterminateStyle";
 
         // Determinate drifting (match AngularGradientBrush speed: 1 cycle/1.7s)
-        private const double DeterminateDriftDurationSeconds = 3.0;
+        private const double DeterminateDriftDurationSeconds = 2.0;
         private static readonly TimeSpan DeterminateDriftTickInterval = TimeSpan.FromMilliseconds(16);
         private const double DeterminateDriftDirection = 1.0; // -1: drift left, +1: drift right
 
@@ -141,25 +141,34 @@ namespace ProgressCircleGradient.Controls.ProgressBar
                 return;
             }
 
-            double w = ActualWidth;
+            double inactiveW = _indeterminateClipHost.ActualWidth;
             double h = _indeterminateClipHost.ActualHeight;
 
-            if (w <= 0 || h <= 0)
+            // Fallback (some layouts report 0 for template parts briefly)
+            if (inactiveW <= 0)
+            {
+                inactiveW = ActualWidth;
+            }
+
+            if (inactiveW <= 0 || h <= 0)
             {
                 return;
             }
 
-            // Active rect width equals track width (w). It moves from -w -> +w.
-            _indeterminateActiveRect.Width = w;
+            // Spec: Inactive / Active = 1.42 (284/200)
+            double activeW = inactiveW / 1.42;
+
+            // Active track width is shorter than inactive track.
+            _indeterminateActiveRect.Width = activeW;
 
             // Clip to bounds (replacement for ClipToBounds)
             _indeterminateClipHost.Clip = new RectangleGeometry()
             {
-                Rect = new Windows.Foundation.Rect(0, 0, w, h)
+                Rect = new Windows.Foundation.Rect(0, 0, inactiveW, h)
             };
 
-            // Reset start position
-            _indeterminateTranslateTransform.X = -w;
+            // Start fully outside on the left
+            _indeterminateTranslateTransform.X = -activeW;
 
             // IMPORTANT: stop storyboard BEFORE mutating keyframes (WinUI throws if active)
             _indeterminateAnimation.Stop();
@@ -167,13 +176,16 @@ namespace ProgressCircleGradient.Controls.ProgressBar
             if (_indeterminateAnimation.Children.Count > 0 &&
                 _indeterminateAnimation.Children[0] is DoubleAnimationUsingKeyFrames translateAnim)
             {
-                // Prefer updating existing keyframes instead of clearing (safer & less churn)
-                if (translateAnim.KeyFrames.Count >= 2 &&
+                // Timeline (total 2000ms):
+                // 0ms..1200ms : -activeW -> +inactiveW (spline [0.54,0,0.38,1])
+                // 1200ms..2000ms: hold at +inactiveW (delay 800ms)
+                if (translateAnim.KeyFrames.Count >= 3 &&
                     translateAnim.KeyFrames[0] is SplineDoubleKeyFrame k0 &&
-                    translateAnim.KeyFrames[1] is SplineDoubleKeyFrame k1)
+                    translateAnim.KeyFrames[1] is SplineDoubleKeyFrame k1 &&
+                    translateAnim.KeyFrames[2] is DoubleKeyFrame k2)
                 {
                     k0.KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(0.0));
-                    k0.Value = -w;
+                    k0.Value = -activeW;
                     k0.KeySpline = new KeySpline()
                     {
                         ControlPoint1 = new Windows.Foundation.Point(0.54, 0),
@@ -181,21 +193,29 @@ namespace ProgressCircleGradient.Controls.ProgressBar
                     };
 
                     k1.KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(1.2));
-                    k1.Value = +w;
+                    k1.Value = inactiveW;
                     k1.KeySpline = new KeySpline()
                     {
                         ControlPoint1 = new Windows.Foundation.Point(0.54, 0),
                         ControlPoint2 = new Windows.Foundation.Point(0.38, 1)
                     };
+
+                    // Hold (delay)
+                    k2.KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(2.0));
+                    k2.Value = inactiveW;
                 }
                 else
                 {
                     translateAnim.KeyFrames.Clear();
-                    translateAnim.KeyFrames.Add(CreateSplineDoubleKeyFrame(0.0, -w));
-                    translateAnim.KeyFrames.Add(CreateSplineDoubleKeyFrame(1.2, +w));
+                    translateAnim.KeyFrames.Add(CreateSplineDoubleKeyFrame(0.0, -activeW));
+                    translateAnim.KeyFrames.Add(CreateSplineDoubleKeyFrame(1.2, inactiveW));
+                    translateAnim.KeyFrames.Add(new DiscreteDoubleKeyFrame()
+                    {
+                        KeyTime = KeyTime.FromTimeSpan(TimeSpan.FromSeconds(2.0)),
+                        Value = inactiveW
+                    });
                 }
             }
-
             _indeterminateAnimation.Begin();
         }
 

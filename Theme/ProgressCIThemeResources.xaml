@@ -43,6 +43,7 @@
                             <ColumnDefinition />
                         </Grid.ColumnDefinitions>
 
+                        <!--  Component  -->
                         <Grid
                             x:Name="PART_RootGrid"
                             Grid.Row="0"
@@ -55,10 +56,12 @@
                                 </TransformGroup>
                             </Grid.RenderTransform>
 
+                            <!--  Dots: all start at center, positioned by TranslateTransform  -->
                             <Grid
                                 x:Name="PART_ColorGrid"
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center">
+                                <!--  Dot 1 (Top)  -->
                                 <Ellipse
                                     x:Name="PART_Ellipse01"
                                     Width="{TemplateBinding EllipseDiameter}"
@@ -68,10 +71,11 @@
                                     Fill="{ThemeResource OneUIProgressCircleIndeterminateEllipse}"
                                     Opacity="1">
                                     <Ellipse.RenderTransform>
-                                        <TranslateTransform x:Name="EllipseTranslate1" Y="{TemplateBinding EllipseNegativeDisplacement}" />
+                                        <TranslateTransform x:Name="EllipseTranslate1" X="0" Y="{TemplateBinding EllipseNegativeDisplacement}" />
                                     </Ellipse.RenderTransform>
                                 </Ellipse>
 
+                                <!--  Dot 2 (Right) - variant  -->
                                 <Ellipse
                                     x:Name="PART_EllipsePoint"
                                     Width="{TemplateBinding EllipseDiameter}"
@@ -81,10 +85,11 @@
                                     Fill="{ThemeResource OneUIProgressCircleIndeterminateVariantEllipse}"
                                     Opacity="1">
                                     <Ellipse.RenderTransform>
-                                        <TranslateTransform x:Name="EllipseTranslate2" X="{TemplateBinding EllipseMaxOffset}" />
+                                        <TranslateTransform x:Name="EllipseTranslate2" X="{TemplateBinding EllipseMaxOffset}" Y="0" />
                                     </Ellipse.RenderTransform>
                                 </Ellipse>
 
+                                <!--  Dot 3 (Bottom)  -->
                                 <Ellipse
                                     x:Name="PART_Ellipse02"
                                     Width="{TemplateBinding EllipseDiameter}"
@@ -94,10 +99,11 @@
                                     Fill="{ThemeResource OneUIProgressCircleIndeterminateEllipse}"
                                     Opacity="1">
                                     <Ellipse.RenderTransform>
-                                        <TranslateTransform x:Name="EllipseTranslate3" Y="{TemplateBinding EllipseMaxOffset}" />
+                                        <TranslateTransform x:Name="EllipseTranslate3" X="0" Y="{TemplateBinding EllipseMaxOffset}" />
                                     </Ellipse.RenderTransform>
                                 </Ellipse>
 
+                                <!--  Dot 4 (Left)  -->
                                 <Ellipse
                                     x:Name="PART_Ellipse03"
                                     Width="{TemplateBinding EllipseDiameter}"
@@ -107,7 +113,7 @@
                                     Fill="{ThemeResource OneUIProgressCircleIndeterminateEllipse}"
                                     Opacity="1">
                                     <Ellipse.RenderTransform>
-                                        <TranslateTransform x:Name="EllipseTranslate4" X="{TemplateBinding EllipseNegativeDisplacement}" />
+                                        <TranslateTransform x:Name="EllipseTranslate4" X="{TemplateBinding EllipseNegativeDisplacement}" Y="0" />
                                     </Ellipse.RenderTransform>
                                 </Ellipse>
                             </Grid>
@@ -116,15 +122,16 @@
                                 <VisualStateGroup x:Name="CommonStates">
                                     <VisualState x:Name="Normal">
                                         <!--
-                                            Total: 2200ms
-                                            Phase1: 0 -> 650ms   (20 -> 11)  [0.5,0,0.83,0.57]
-                                            Phase2: 650 -> 1100ms (11 -> 0)  [0.34,0.83,0.61,1]
-                                            Phase3: 1100 -> 2000ms (0 -> 20) [0.12,0.13,0.31,1] (updated for Dot2/3/4)
+                                            Dot/Scale total: 2200ms (Delay 200ms at end)
+                                            Phase 1: 0 -> 650ms    (20dp -> 11dp)   [0.5,0,0.83,0.57]
+                                            Phase 2: 650 -> 1100ms (11dp -> 0dp)    [0.34,0.83,0.61,1] + opacity down to 45/70/55/70
+                                            Phase 3: 1100 -> 2000ms (0dp -> 20dp)   [0.12,0.13,0.31,1] (updated for Dot2/3/4)
                                             Delay: 2000 -> 2200ms hold
+                                            Rotation: 2000ms loop (no hold) linear
                                         -->
                                         <Storyboard x:Name="RotateAnimation">
 
-                                            <!--  ✅ Rotation: continuous, no hold (linear)  -->
+                                            <!--  Rotation: 0->360 in 2000ms, repeat immediately  -->
                                             <DoubleAnimationUsingKeyFrames
                                                 BeginTime="0"
                                                 RepeatBehavior="Forever"
@@ -136,13 +143,14 @@
                                                     Value="0" />
                                                 <SplineDoubleKeyFrame
                                                     KeySpline="0,0,1,1"
-                                                    KeyTime="0:0:2.2"
+                                                    KeyTime="0:0:2"
                                                     Value="360" />
                                             </DoubleAnimationUsingKeyFrames>
 
-                                            <!--  ✅ Component Scale: return at 2000ms, hold 200ms  -->
+                                            <!--  Component scale X  -->
                                             <DoubleAnimationUsingKeyFrames
                                                 BeginTime="0"
+                                                EnableDependentAnimation="True"
                                                 RepeatBehavior="Forever"
                                                 Storyboard.TargetName="GS"
                                                 Storyboard.TargetProperty="ScaleX">
@@ -168,8 +176,10 @@
                                                     Value="1" />
                                             </DoubleAnimationUsingKeyFrames>
 
+                                            <!--  Component scale Y  -->
                                             <DoubleAnimationUsingKeyFrames
                                                 BeginTime="0"
+                                                EnableDependentAnimation="True"
                                                 RepeatBehavior="Forever"
                                                 Storyboard.TargetName="GS"
                                                 Storyboard.TargetProperty="ScaleY">
@@ -195,9 +205,10 @@
                                                     Value="1" />
                                             </DoubleAnimationUsingKeyFrames>
 
-                                            <!--  Dot1 (Top): Y -outer -> -inner -> 0 -> -outer  -->
+                                            <!--  Dot 1 (Top) Y: -20 -> -11 -> 0 -> -20  -->
                                             <DoubleAnimationUsingKeyFrames
                                                 BeginTime="0"
+                                                EnableDependentAnimation="True"
                                                 RepeatBehavior="Forever"
                                                 Storyboard.TargetName="EllipseTranslate1"
                                                 Storyboard.TargetProperty="Y">
@@ -217,9 +228,10 @@
                                                 <DiscreteDoubleKeyFrame KeyTime="0:0:2.2" Value="{Binding EllipseNegativeDisplacement, RelativeSource={RelativeSource Mode=TemplatedParent}}" />
                                             </DoubleAnimationUsingKeyFrames>
 
-                                            <!--  Dot2 (Right): X +outer -> +inner -> 0 -> +outer  -->
+                                            <!--  Dot 2 (Right) X: +20 -> +11 -> 0 -> +20  -->
                                             <DoubleAnimationUsingKeyFrames
                                                 BeginTime="0"
+                                                EnableDependentAnimation="True"
                                                 RepeatBehavior="Forever"
                                                 Storyboard.TargetName="EllipseTranslate2"
                                                 Storyboard.TargetProperty="X">
@@ -232,6 +244,7 @@
                                                     KeySpline="0.34,0.83,0.61,1"
                                                     KeyTime="0:0:1.1"
                                                     Value="0" />
+                                                <!--  Phase 3 update: [0.12,0.13,0.31,1]  -->
                                                 <SplineDoubleKeyFrame
                                                     KeySpline="0.12,0.13,0.31,1"
                                                     KeyTime="0:0:2.0"
@@ -239,9 +252,10 @@
                                                 <DiscreteDoubleKeyFrame KeyTime="0:0:2.2" Value="{Binding EllipseMaxOffset, RelativeSource={RelativeSource Mode=TemplatedParent}}" />
                                             </DoubleAnimationUsingKeyFrames>
 
-                                            <!--  Dot3 (Bottom): Y +outer -> +inner -> 0 -> +outer  -->
+                                            <!--  Dot 3 (Bottom) Y: +20 -> +11 -> 0 -> +20  -->
                                             <DoubleAnimationUsingKeyFrames
                                                 BeginTime="0"
+                                                EnableDependentAnimation="True"
                                                 RepeatBehavior="Forever"
                                                 Storyboard.TargetName="EllipseTranslate3"
                                                 Storyboard.TargetProperty="Y">
@@ -254,6 +268,7 @@
                                                     KeySpline="0.34,0.83,0.61,1"
                                                     KeyTime="0:0:1.1"
                                                     Value="0" />
+                                                <!--  Phase 3 update: [0.12,0.13,0.31,1]  -->
                                                 <SplineDoubleKeyFrame
                                                     KeySpline="0.12,0.13,0.31,1"
                                                     KeyTime="0:0:2.0"
@@ -261,9 +276,10 @@
                                                 <DiscreteDoubleKeyFrame KeyTime="0:0:2.2" Value="{Binding EllipseMaxOffset, RelativeSource={RelativeSource Mode=TemplatedParent}}" />
                                             </DoubleAnimationUsingKeyFrames>
 
-                                            <!--  Dot4 (Left): X -outer -> -inner -> 0 -> -outer  -->
+                                            <!--  Dot 4 (Left) X: -20 -> -11 -> 0 -> -20  -->
                                             <DoubleAnimationUsingKeyFrames
                                                 BeginTime="0"
+                                                EnableDependentAnimation="True"
                                                 RepeatBehavior="Forever"
                                                 Storyboard.TargetName="EllipseTranslate4"
                                                 Storyboard.TargetProperty="X">
@@ -276,6 +292,7 @@
                                                     KeySpline="0.34,0.83,0.61,1"
                                                     KeyTime="0:0:1.1"
                                                     Value="0" />
+                                                <!--  Phase 3 update: [0.12,0.13,0.31,1]  -->
                                                 <SplineDoubleKeyFrame
                                                     KeySpline="0.12,0.13,0.31,1"
                                                     KeyTime="0:0:2.0"
@@ -283,7 +300,7 @@
                                                 <DiscreteDoubleKeyFrame KeyTime="0:0:2.2" Value="{Binding EllipseNegativeDisplacement, RelativeSource={RelativeSource Mode=TemplatedParent}}" />
                                             </DoubleAnimationUsingKeyFrames>
 
-                                            <!--  Opacity: keep spec values, extend Phase3 to 2000ms  -->
+                                            <!--  Opacity (spec): at 1100ms (0dp) => 45/70/55/70  -->
                                             <DoubleAnimationUsingKeyFrames
                                                 BeginTime="0"
                                                 RepeatBehavior="Forever"
