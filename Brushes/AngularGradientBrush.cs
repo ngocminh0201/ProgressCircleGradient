@@ -20,7 +20,7 @@ namespace ProgressCircleGradient.Brushes
         private const float InitialAngleOffset = -46.2f;
 
         // Thời gian để quay 1 vòng (giây). Bạn chỉnh số này nếu muốn nhanh/chậm hơn.
-        private const float SpinDurationSeconds = 1.7f;
+        private const float SpinDurationSeconds = 2.0f;
 
         // FPS redraw (30fps là đủ mượt với tốc độ quay này)
         private static readonly TimeSpan TickInterval = TimeSpan.FromMilliseconds(33);
@@ -242,11 +242,11 @@ namespace ProgressCircleGradient.Brushes
             int k = 0;
             for (int y = 0; y < height; y++)
             {
-                float py = (y + 0.5f) - cy;
+                float py = y + 0.5f - cy;
 
                 for (int x = 0; x < width; x++)
                 {
-                    float px = (x + 0.5f) - cx;
+                    float px = x + 0.5f - cx;
 
                     // same math you had: 0° at 6h, clockwise
                     float rad = MathF.Atan2(-px, py);
@@ -277,7 +277,7 @@ namespace ProgressCircleGradient.Brushes
 
                 // pack BGRA (premultiplied)
                 uint packed =
-                    (uint)(bP) |
+                    bP |
                     ((uint)gP << 8) |
                     ((uint)rP << 16) |
                     ((uint)a << 24);
@@ -362,13 +362,13 @@ namespace ProgressCircleGradient.Brushes
             float ap0 = prev.A / 255f;
             float ap1 = next.A / 255f;
 
-            float r0 = (prev.R / 255f) * ap0;
-            float g0 = (prev.G / 255f) * ap0;
-            float b0 = (prev.B / 255f) * ap0;
+            float r0 = prev.R / 255f * ap0;
+            float g0 = prev.G / 255f * ap0;
+            float b0 = prev.B / 255f * ap0;
 
-            float r1 = (next.R / 255f) * ap1;
-            float g1 = (next.G / 255f) * ap1;
-            float b1 = (next.B / 255f) * ap1;
+            float r1 = next.R / 255f * ap1;
+            float g1 = next.G / 255f * ap1;
+            float b1 = next.B / 255f * ap1;
 
             float a = Lerp(ap0, ap1, t);
             float rP = Lerp(r0, r1, t);
