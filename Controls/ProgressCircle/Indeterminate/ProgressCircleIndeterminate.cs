@@ -34,7 +34,8 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
         private const double VI_LG_GRID_SIZE = 60.0;
         private const double VI_LG_DOT_SIZE = 14.0;
         private const double VI_LG_OUTER_DISTANCE = 20.0;
-        private const double VI_LG_INNER_DISTANCE = 11.0;
+        // Animation spec: Phase1 moves 11dp toward center from the 20dp outer position (=> 9dp from center at 650ms)
+        private const double VI_LG_INNER_DISTANCE = 9.0;
 
         private const int GRIDSIZE_XL = 90;
         private const int GRIDSIZE_LG = 60;
@@ -100,7 +101,7 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
 
         // Re-purposed for VI distances:
         //  - EllipseMaxOffset  : outer distance (20dp @ LG)
-        //  - EllipseMinOffset  : inner distance (11dp @ LG)
+        //  - EllipseMinOffset  : phase1 distance from center (9dp @ LG)
         //  - EllipseNegativeDisplacement : -outer
         //  - EllipseNegativeMinOffset    : -inner
         internal double EllipseMinOffset
@@ -274,10 +275,10 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
             EllipseDiameter = VI_LG_DOT_SIZE * scaleFactor;
 
             EllipseMaxOffset = VI_LG_OUTER_DISTANCE * scaleFactor;   // 20dp @ LG
-            EllipseMinOffset = VI_LG_INNER_DISTANCE * scaleFactor;   // 11dp @ LG
+            EllipseMinOffset = VI_LG_INNER_DISTANCE * scaleFactor;   // 9dp @ LG (after moving 11dp toward center)
 
             EllipseNegativeDisplacement = -EllipseMaxOffset;         // -outer
-            EllipseNegativeMinOffset = -EllipseMinOffset;            // -inner
+            EllipseNegativeMinOffset = -EllipseMinOffset;            // -phase1 target
 
             // Keep old props consistent (not used by new template)
             EllipseDisplacementPosition = EllipseMaxOffset;
@@ -455,10 +456,10 @@ namespace ProgressCircleGradient.Controls.ProgressCircle
             Color cBottom = AngularGradientBrush.SampleColorAtPoint(bottom, cx, cy);
             Color cLeft = AngularGradientBrush.SampleColorAtPoint(left, cx, cy);
 
-            _ellipse01.Fill = new SolidColorBrush(cTop);
-            _ellipsePoint.Fill = new SolidColorBrush(cRight);
-            _ellipse02.Fill = new SolidColorBrush(cBottom);
-            _ellipse03.Fill = new SolidColorBrush(cLeft);
+            _ellipse01.Fill = new SolidColorBrush(cRight);
+            _ellipsePoint.Fill = new SolidColorBrush(cTop);
+            _ellipse02.Fill = new SolidColorBrush(cLeft);
+            _ellipse03.Fill = new SolidColorBrush(cBottom);
 
             return true;
         }
